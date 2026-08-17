@@ -29,6 +29,7 @@ import static com.velocitypowered.proxy.network.Connections.MINECRAFT_ENCODER;
 import com.google.common.base.Preconditions;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.natives.compression.VelocityCompressor;
+import com.velocitypowered.natives.encryption.BatchingVelocityCipher;
 import com.velocitypowered.natives.encryption.VelocityCipher;
 import com.velocitypowered.natives.encryption.VelocityCipherFactory;
 import com.velocitypowered.natives.util.Natives;
@@ -43,6 +44,7 @@ import com.velocitypowered.proxy.protocol.MinecraftPacket;
 import com.velocitypowered.proxy.protocol.ProtocolUtils;
 import com.velocitypowered.proxy.protocol.StateRegistry;
 import com.velocitypowered.proxy.protocol.VelocityConnectionEvent;
+import com.velocitypowered.proxy.protocol.netty.BatchingCipherEncoder;
 import com.velocitypowered.proxy.protocol.netty.MinecraftCipherDecoder;
 import com.velocitypowered.proxy.protocol.netty.MinecraftCipherEncoder;
 import com.velocitypowered.proxy.protocol.netty.MinecraftCompressDecoder;
@@ -633,8 +635,13 @@ public class MinecraftConnection extends ChannelInboundHandlerAdapter {
     VelocityCipher encryptionCipher = factory.forEncryption(key);
     channel.pipeline()
         .addBefore(FRAME_DECODER, CIPHER_DECODER, new MinecraftCipherDecoder(decryptionCipher));
-    channel.pipeline()
-        .addBefore(FRAME_ENCODER, CIPHER_ENCODER, new MinecraftCipherEncoder(encryptionCipher));
+    // Batched encryption, when enabled and supported, encrypts every channel on this event loop
+    // in one native call instead of one per channel. Same bytes on the wire either way.
+    final ChannelHandler cipherEncoder =
+        BatchingCipherEncoder.isEnabled() && encryptionCipher instanceof BatchingVelocityCipher bc
+            ? new BatchingCipherEncoder(bc)
+            : new MinecraftCipherEncoder(encryptionCipher);
+    channel.pipeline().addBefore(FRAME_ENCODER, CIPHER_ENCODER, cipherEncoder);
 
     channel.pipeline().fireUserEventTriggered(VelocityConnectionEvent.ENCRYPTION_ENABLED);
   }

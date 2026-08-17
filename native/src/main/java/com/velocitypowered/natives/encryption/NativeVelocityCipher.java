@@ -26,7 +26,7 @@ import javax.crypto.SecretKey;
 /**
  * Implements AES-CFB8 encryption/decryption using a native library.
  */
-public class NativeVelocityCipher implements VelocityCipher {
+public class NativeVelocityCipher implements BatchingVelocityCipher {
 
   public static final VelocityCipherFactory FACTORY = new VelocityCipherFactory() {
     @Override
@@ -62,6 +62,12 @@ public class NativeVelocityCipher implements VelocityCipher {
       OpenSslCipherImpl.free(ctx);
     }
     disposed = true;
+  }
+
+  @Override
+  public long nativeHandle() {
+    ensureNotDisposed();
+    return ctx;
   }
 
   private void ensureNotDisposed() {
