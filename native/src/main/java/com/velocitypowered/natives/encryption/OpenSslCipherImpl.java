@@ -26,4 +26,14 @@ class OpenSslCipherImpl {
   static native void process(long ctx, long source, int len, long dest);
 
   static native void free(long ptr);
+
+  /**
+   * Encrypts several frames in one crossing. Absent from OpenSSL-built cipher libraries, so the
+   * first call there raises {@link UnsatisfiedLinkError}; {@link VelocityCipherBatch} relies on
+   * that to probe for support.
+   */
+  static native void processBatch(long[] ctxs, long[] addrs, int[] lens, int count);
+
+  /** Number of streams the native side processes in lockstep. Doubles as the capability probe. */
+  static native int batchLanes();
 }

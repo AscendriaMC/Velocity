@@ -173,3 +173,17 @@ dependencies {
     annotationProcessor(libs.auto.service)
     annotationProcessor(libs.log4j.core)
 }
+
+// Dev tool: outbound encryption throughput through the real netty write path.
+// See CipherBatchHarness for usage.
+tasks.register<JavaExec>("cipherHarness") {
+    group = "verification"
+    description = "Measures outbound cipher throughput, with and without batching."
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass = "com.velocitypowered.proxy.protocol.netty.CipherBatchHarness"
+    systemProperties(
+        System.getProperties()
+            .mapKeys { it.key.toString() }
+            .filterKeys { it.startsWith("velocity.") || it.startsWith("mccrypt.") }
+    )
+}
