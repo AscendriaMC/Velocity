@@ -1,0 +1,39 @@
+[package]
+name = "mccrypt"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77"
+license = "GPL-3.0-or-later"
+publish = false
+description = "AES-128-CFB8 kernels for the Minecraft protocol; drop-in replacement for velocity-natives' OpenSSL cipher"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# No test harness for the bench binary: `panic = "abort"` in the release profile
+# is incompatible with the unwinding harness, and there is nothing to harness.
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+test = false
+bench = false
+
+[dependencies]
+# Types + the JNIEnv vtable only. No linking against libjvm: the JVM resolves our
+# symbols, not the other way around.
+jni-sys = "0.3"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+
+# The shipped artifact. `panic = "abort"` cannot live in [profile.release] —
+# `cargo test --release` links the lib into an unwinding harness and refuses the
+# mismatch — so the shipped build gets its own profile. Rust >= 1.81 already
+# aborts on unwind across an `extern "system"` boundary; this is belt and braces,
+# and drops the landing pads from the kernels.
+[profile.dist]
+inherits = "release"
+panic = "abort"

@@ -110,8 +110,8 @@ public class Natives {
   public static final NativeCodeLoader<VelocityCipherFactory> cipher = new NativeCodeLoader<>(
       ImmutableList.of(
           new NativeCodeLoader.Variant<>(NativeConstraints.LINUX_X86_64,
-              copyAndLoadNative("/linux_x86_64/velocity-cipher.so"), // Any local version
-              "OpenSSL local (Linux x86_64)", NativeVelocityCipher.FACTORY),
+              copyAndLoadNative("/linux_x86_64/velocity-cipher.so"), // mccrypt, see mccrypt/
+              "mccrypt (Linux x86_64)", NativeVelocityCipher.FACTORY),
           new NativeCodeLoader.Variant<>(NativeConstraints.LINUX_X86_64,
               copyAndLoadNative("/linux_x86_64/velocity-cipher-ossl30x.so"), // Ubuntu 22.04
               "OpenSSL 3.x.x (Linux x86_64)", NativeVelocityCipher.FACTORY),
@@ -124,7 +124,7 @@ public class Natives {
 
           new NativeCodeLoader.Variant<>(NativeConstraints.LINUX_AARCH64,
               copyAndLoadNative("/linux_aarch64/velocity-cipher.so"),
-              "OpenSSL local (Linux aarch64)", NativeVelocityCipher.FACTORY), // Any local version
+              "mccrypt (Linux aarch64)", NativeVelocityCipher.FACTORY), // mccrypt, see mccrypt/
           new NativeCodeLoader.Variant<>(NativeConstraints.LINUX_AARCH64,
               copyAndLoadNative("/linux_aarch64/velocity-cipher-ossl30x.so"),
               "OpenSSL 3.x.x (Linux aarch64)", NativeVelocityCipher.FACTORY), // Ubuntu 22.04
@@ -137,7 +137,7 @@ public class Natives {
 
           new NativeCodeLoader.Variant<>(NativeConstraints.MACOS_AARCH64,
               copyAndLoadNative("/macos_arm64/velocity-cipher.dylib"),
-              "native (macOS ARM64 / Apple Silicon)",
+              "mccrypt (macOS ARM64 / Apple Silicon)",
                NativeVelocityCipher.FACTORY),
 
           new NativeCodeLoader.Variant<>(NativeCodeLoader.ALWAYS, () -> {
