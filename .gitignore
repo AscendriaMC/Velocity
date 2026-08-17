@@ -96,4 +96,12 @@ native/mbedtls
 native/zlib-ng
 native/zlib-cf
 native/libdeflate
-native/src/main/resources/linux_x86_64/velocity-cipher.so
+# Upstream ignores the "local build" cipher slot because it is scratch space for
+# a locally-compiled OpenSSL. In this fork that slot is mccrypt's shipped
+# artifact (see mccrypt/README.md), so it is tracked like the other natives.
+# mccrypt (Rust cipher kernel)
+mccrypt/target/
+mccrypt/jvmtest/out/
+# The unrooted `bin/` rule above (IDE output) also swallows Cargo's binary
+# directory, which would silently drop the bench from every commit.
+!mccrypt/src/bin/
