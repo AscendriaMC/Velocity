@@ -24,6 +24,26 @@ bootstrap:
 build:
     @buck2 build //proxy:all '//mccrypt:mccrypt[cdylib]' //mccrypt:bench --show-simple-output
 
+# The proxy jar with the revision stamped into Implementation-Version, the way upstream's
+# gradle build stamps snapshots: "<version> (git-<rev>)", plus the jj bookmark when there is
+# one. The revision reaches the build as config (-c), so only the final assembly step re-runs.
+release:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{root}}"
+    version="$(sed -n 's/^version=//p' gradle.properties)"
+    if jj --ignore-working-copy root >/dev/null 2>&1; then
+        rev="$(jj --ignore-working-copy log -r @- --no-graph -T 'commit_id.short(8)')"
+        bookmark="$(jj --ignore-working-copy log -r @- --no-graph -T 'bookmarks.map(|b| b.name()).join(",")')"
+    else
+        rev="$(git rev-parse --short=8 HEAD)"
+        bookmark="$(git symbolic-ref --short -q HEAD || true)"
+    fi
+    stamp="$version (git-$rev${bookmark:+, $bookmark})"
+    mkdir -p dist
+    buck2 build //proxy:all -c "velocity.implementation_version=$stamp" --out dist/velocity-proxy-all.jar
+    echo "dist/velocity-proxy-all.jar: $(unzip -p dist/velocity-proxy-all.jar META-INF/MANIFEST.MF | grep Implementation-Version)"
+
 # mccrypt/Cargo.lock -> third-party/rust/BUCK (see reindeer.toml). Re-run after changing
 # mccrypt's dependencies; the diff of the generated file is the review.
 lock-rust:

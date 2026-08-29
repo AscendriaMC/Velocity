@@ -112,3 +112,4 @@ mccrypt/jvmtest/out/
 /.direnv/
 /third-party/rust/.cargo/
 /third-party/rust/target/
+/dist/

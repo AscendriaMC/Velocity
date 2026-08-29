@@ -21,7 +21,14 @@ java_library(
 # The shipped proxy jar, what shadowJar produces in gradle. Same relocation, exclusion and log4j
 # plugin-cache merge; on top of that META-INF/services are merged rather than first-wins (gradle
 # silently keeps only the first jar's providers) and module-info.class files are dropped.
-# Implementation-Version comes from gradle.properties, the one place the version is written.
+#
+# Implementation-Version comes from gradle.properties, the one place the version is written --
+# unless the build was invoked with `-c velocity.implementation_version=...`, which is how
+# `just release` stamps the revision in. Stamping through config rather than by running jj/git in
+# an action keeps every step but this last one cacheable across revisions, and the developer
+# build reproducible.
+IMPLEMENTATION_VERSION = read_root_config("velocity", "implementation_version", "")
+
 jar_assembly(
     name = "all",
     inputs = [":lib", "//api:lib", "//native:lib"]
@@ -39,7 +46,9 @@ jar_assembly(
         "Implementation-Vendor": "Velocity Contributors",
         "Multi-Release": "true",
         "Enable-Native-Access": "ALL-UNNAMED",
+    } | ({"Implementation-Version": IMPLEMENTATION_VERSION} if IMPLEMENTATION_VERSION else {}),
+    manifest_from_properties = {} if IMPLEMENTATION_VERSION else {
+        "Implementation-Version": ("//:gradle.properties", "version"),
     },
-    manifest_from_properties = {"Implementation-Version": ("//:gradle.properties", "version")},
     visibility = ["PUBLIC"],
 )
