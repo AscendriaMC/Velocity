@@ -1,10 +1,14 @@
-# Toolchains the bundled prelude's rules look up by these exact names. All "system_" flavours:
-# rustc, cc and python3 come from PATH, i.e. from the devshell.
+# Toolchains the bundled prelude's rules look up by these exact names. rustc and python3 come
+# from PATH, i.e. from the devshell; the C toolchain depends on what is being built FOR.
 load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
 load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
 load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
+load("@prelude//toolchains/cxx/zig:defs.bzl", "cxx_zig_toolchain")
+load("@root//bzl:zig.bzl", "system_zig_distribution")
 
+# rustc_target_triple defaults to a select on the target platform's os/cpu, which is what makes
+# //platforms:linux-* produce Linux code with no per-target configuration here.
 system_rust_toolchain(
     name = "rust",
     default_edition = "2021",
@@ -14,8 +18,41 @@ system_rust_toolchain(
     visibility = ["PUBLIC"],
 )
 
+# The C toolchain is what rustc links through (-Clinker=). For the host it is the system one;
+# for the Linux slots it is `zig cc -target <triple>.2.17`, the same glibc floor build-native.sh
+# used with cargo-zigbuild, so the artifacts run anywhere the OpenSSL ones did. zig 0.16 accepts
+# everything rustc 1.98 puts on a linux-gnu link line (-fuse-ld=lld, -lgcc_s, --version-script,
+# -z relro/now ...), so no cargo-zigbuild-style argument rewriting is needed in between.
+system_zig_distribution(
+    name = "zig",
+    version = read_config("zig", "toolchain_version", "unknown"),
+)
+
+cxx_zig_toolchain(
+    name = "cxx-zig-linux-x86_64",
+    distribution = ":zig",
+    target = "x86_64-linux-gnu.2.17",
+)
+
+cxx_zig_toolchain(
+    name = "cxx-zig-linux-aarch64",
+    distribution = ":zig",
+    target = "aarch64-linux-gnu.2.17",
+)
+
 system_cxx_toolchain(
+    name = "cxx-system",
+)
+
+toolchain_alias(
     name = "cxx",
+    actual = select({
+        "DEFAULT": ":cxx-system",
+        "prelude//os:linux": select({
+            "prelude//cpu:arm64": ":cxx-zig-linux-aarch64",
+            "prelude//cpu:x86_64": ":cxx-zig-linux-x86_64",
+        }),
+    }),
     visibility = ["PUBLIC"],
 )
 

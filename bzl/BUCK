@@ -14,3 +14,9 @@ export_file(
     src = "javac.sh",
     visibility = ["PUBLIC"],
 )
+
+export_file(
+    name = "zig-wrapper.sh",
+    src = "zig-wrapper.sh",
+    visibility = ["PUBLIC"],
+)
