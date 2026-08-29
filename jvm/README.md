@@ -6,10 +6,10 @@ nothing in here loads from `root//` or `prelude//`.
 
 ## Contract with the consumer
 
-- `toolchains//:java` — an instance of `java_toolchain` (rules/java.bzl). Tools are bare names
-  looked up on PATH; `version` is threaded into every action's env so a JDK change invalidates
-  what it should. Use `read_root_config` in the consumer's `toolchains/BUCK` so a
-  `.buckconfig.local` in the project root can supply it.
+- `toolchains//:java` — an instance of `java_toolchain` (rules/java.bzl). `java`, `javac` and
+  `jar` are targets providing `RunInfo`, taken as exec deps: a buck2.nix `flake.package` (then
+  the tool is an input of every action, and is realised on whichever machine runs it), or a
+  `system_tool` naming a PATH entry (then pass `version` so a JDK change still invalidates).
 - Dependencies are flat: a target's `deps` is its classpath, in order. The consumer produces those
   lists however it likes (Velocity derives them from Gradle's resolution; see
   `tools/gen-third-party.py` there).

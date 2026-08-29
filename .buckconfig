@@ -6,6 +6,9 @@
   # The JVM rules + the jar assembly tool. Written to be lifted out into their own repository
   # (and consumed as an external cell) -- nothing in jvm// may load from root// or prelude//.
   jvm = jvm
+  # buck2.nix: tools as flake packages, realised by `nix build` wherever the action runs. See
+  # third-party/buck2.nix/NOTICE.md for why it is vendored.
+  nix = third-party/buck2.nix
 
 # The prelude that ships inside the buck2 binary. It is what reindeer's generated rules
 # (cargo.rust_library, buildscript_run, http_archive) are written against; the java rules in
@@ -24,7 +27,14 @@
   target_platform_detector_spec = target:root//...->prelude//platforms:default
 
 [build]
-  execution_platforms = prelude//platforms:default
+  # platforms/BUCK: local, plus remote workers when `-c re.enabled=true`.
+  execution_platforms = root//platforms:execution
+
+# Remote execution: optional, and entirely per-checkout. The workers are expected to have nothing
+# on them but nix -- every tool an action needs comes from nix/flake.nix. Both halves live in
+# .buckconfig.local, which is not committed: `[re] enabled = true` to turn it on, and a
+# `[buck2_re_client]` section with engine_address / action_cache_address / cas_address (plus tls
+# and instance_name) pointing at your own instance. A plain build never touches the network.
 
 [rust]
   default_edition = 2021
@@ -38,3 +48,5 @@
 
 [buck2]
   file_watcher = notify
+  # What the RE protocol speaks; also what the workers' nix-built tools are keyed by upstream.
+  digest_algorithms = SHA256

@@ -1,76 +1,186 @@
-# Toolchains the bundled prelude's rules look up by these exact names. rustc and python3 come
-# from PATH, i.e. from the devshell; the C toolchain depends on what is being built FOR.
+# Toolchains the bundled prelude's rules (and jvm//'s) look up by these exact names.
+#
+# Every tool is a package of nix/flake.nix, built by buck2.nix's flake.package on whichever
+# machine runs the action -- this Mac for the local execution platform, a remote worker for
+# the remote ones -- so the same BUCK file serves both, and a worker needs nothing but nix.
 load("@jvm//rules:java.bzl", "java_toolchain")
-load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@nix//:flake.bzl", "flake")
+load("@nix//toolchains:python.bzl", "nix_python_bootstrap_toolchain")
+load("@nix//toolchains:rust.bzl", "nix_rust_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
-load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
-load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
 load("@prelude//toolchains/cxx/zig:defs.bzl", "cxx_zig_toolchain")
-load("@root//bzl:zig.bzl", "system_zig_distribution")
+load("@root//bzl:nix_cxx.bzl", "nix_cxx_toolchain")
+load("@root//bzl:zig.bzl", "zig_distribution")
 
-# javac/jar/java from PATH; the JDK's identity comes from the root .buckconfig.local that
-# `just bootstrap` writes, hence read_root_config rather than read_config.
+# ---- packages ------------------------------------------------------------------------------
+# local_only = False: the nix build may run on a remote worker. That is only sound because the
+# workers have nix and a persistent store.
+#
+# A package is built for the platform of the machine that will run it (its target configuration
+# is the consumer's execution platform), and nix can only build that on a machine of the same
+# platform. Exec deps pick their own execution platform -- first compatible -- so without this
+# the aarch64-darwin rustc would be scheduled onto a Linux worker.
+_EXEC_LIKE_TARGET = select({
+    "prelude//os:linux": select({
+        "prelude//cpu:arm64": ["prelude//os/constraints:linux", "prelude//cpu/constraints:arm64"],
+        "prelude//cpu:x86_64": ["prelude//os/constraints:linux", "prelude//cpu/constraints:x86_64"],
+    }),
+    "prelude//os:macos": select({
+        "prelude//cpu:arm64": ["prelude//os/constraints:macos", "prelude//cpu/constraints:arm64"],
+        "prelude//cpu:x86_64": ["prelude//os/constraints:macos", "prelude//cpu/constraints:x86_64"],
+    }),
+})
+
+flake.package(
+    name = "jdk",
+    binaries = ["java", "javac", "jar"],
+    exec_compatible_with = _EXEC_LIKE_TARGET,
+    local_only = False,
+    wrappers = True,
+    path = "@root//nix:flake",
+)
+
+flake.package(
+    name = "rustc",
+    binaries = ["rustdoc", "cargo"],
+    binary = "rustc",
+    exec_compatible_with = _EXEC_LIKE_TARGET,
+    local_only = False,
+    wrappers = True,
+    package = "rust",
+    path = "@root//nix:flake",
+)
+
+flake.package(
+    name = "zig",
+    binary = "zig",
+    exec_compatible_with = _EXEC_LIKE_TARGET,
+    local_only = False,
+    wrappers = True,
+    path = "@root//nix:flake",
+)
+
+flake.package(
+    name = "nix_cc",
+    binaries = ["ar", "c++", "cc", "nm", "objcopy", "ranlib", "strip"],
+    exec_compatible_with = _EXEC_LIKE_TARGET,
+    local_only = False,
+    package = "cxx",
+    path = "@root//nix:flake",
+    wrappers = True,
+)
+
+flake.package(
+    name = "python",
+    binary = "python3",
+    exec_compatible_with = _EXEC_LIKE_TARGET,
+    local_only = False,
+    wrappers = True,
+    path = "@root//nix:flake",
+)
+
+# ---- toolchains ----------------------------------------------------------------------------
+
 java_toolchain(
     name = "java",
-    java = read_root_config("java", "java", "java"),
-    javac = read_root_config("java", "javac", "javac"),
-    jar = read_root_config("java", "jar", "jar"),
-    version = read_root_config("java", "toolchain_version", "unknown"),
+    java = ":jdk[java]",
+    javac = ":jdk[javac]",
+    jar = ":jdk[jar]",
     visibility = ["PUBLIC"],
 )
 
 # rustc_target_triple defaults to a select on the target platform's os/cpu, which is what makes
-# //platforms:linux-* produce Linux code with no per-target configuration here.
-system_rust_toolchain(
+# //platforms:linux-* produce Linux code with no per-target configuration here. The minimal
+# rust profile has no clippy; rustc stands in for the attribute the rule insists on.
+nix_rust_toolchain(
     name = "rust",
+    clippy = ":rustc",
     default_edition = "2021",
+    rustc = ":rustc",
+    rustdoc = ":rustc[rustdoc]",
     # The only crate that matters for speed is mccrypt's kernels; the rest is JNI typedefs and
     # a proc macro. Set here so it is one flag, not one per target.
     rustc_flags = ["-Copt-level=3"],
     visibility = ["PUBLIC"],
 )
 
-# The C toolchain is what rustc links through (-Clinker=). For the host it is the system one;
-# for the Linux slots it is `zig cc -target <triple>.2.17`, the same glibc floor build-native.sh
-# used with cargo-zigbuild, so the artifacts run anywhere the OpenSSL ones did. zig 0.16 accepts
-# everything rustc 1.98 puts on a linux-gnu link line (-fuse-ld=lld, -lgcc_s, --version-script,
-# -z relro/now ...), so no cargo-zigbuild-style argument rewriting is needed in between.
-system_zig_distribution(
-    name = "zig",
-    version = read_config("zig", "toolchain_version", "unknown"),
+# The C toolchain is what rustc links through (-Clinker=), and there are two kinds of link:
+#
+#   * the shipping cdylibs for //platforms:linux-* (constraint :glibc-2.17): `zig cc -target
+#     <triple>-linux-gnu.2.17`, the glibc floor build-native.sh used with cargo-zigbuild, so the
+#     artifacts run on any distribution. zig 0.16 accepts everything rustc 1.98 puts on a
+#     linux-gnu link line except one flag, which bzl/zig-wrapper.sh drops;
+#   * everything else -- build scripts, proc macros, bench, the macOS slot -- links with nix's
+#     cc for the platform it runs on. A worker has no /lib/ld-linux, so a glibc-2.17 link of a
+#     build script would not even start there; nix's cc produces binaries that run on nix.
+#
+# The macOS instance is exec-constrained to macOS: a Mach-O link cannot happen on a Linux
+# worker, so under remote execution it is the one kind of step that stays local. (The
+# same nested-resolution reason as python_bootstrap below.)
+zig_distribution(
+    name = "zig-dist",
+    zig = ":zig",
 )
 
 cxx_zig_toolchain(
     name = "cxx-zig-linux-x86_64",
-    distribution = ":zig",
+    distribution = ":zig-dist",
     target = "x86_64-linux-gnu.2.17",
 )
 
 cxx_zig_toolchain(
     name = "cxx-zig-linux-aarch64",
-    distribution = ":zig",
+    distribution = ":zig-dist",
     target = "aarch64-linux-gnu.2.17",
 )
 
-system_cxx_toolchain(
-    name = "cxx-system",
+nix_cxx_toolchain(
+    name = "cxx-nix-any",
+    nix_cc = ":nix_cc",
+)
+
+nix_cxx_toolchain(
+    name = "cxx-nix-macos",
+    exec_compatible_with = ["prelude//os/constraints:macos"],
+    nix_cc = ":nix_cc",
 )
 
 toolchain_alias(
     name = "cxx",
     actual = select({
-        "DEFAULT": ":cxx-system",
-        "prelude//os:linux": select({
+        "DEFAULT": ":cxx-nix-any",
+        "@root//platforms:portable-linux": select({
             "prelude//cpu:arm64": ":cxx-zig-linux-aarch64",
             "prelude//cpu:x86_64": ":cxx-zig-linux-x86_64",
         }),
+        "prelude//os:macos": ":cxx-nix-macos",
     }),
     visibility = ["PUBLIC"],
 )
 
-# Build scripts are run through a small python driver in the prelude.
-system_python_bootstrap_toolchain(
+# Build scripts and rustc itself are driven through small python scripts in the prelude. The
+# prelude reaches this toolchain through a nested one (rust/tools:internal_tools_toolchain), and
+# nested toolchains pick their execution platform on their own -- first compatible -- rather than
+# following the consumer, so with remote platforms listed first a proc macro linked on this Mac
+# (macOS target, Mach-O linker) would be handed a Linux python. Selecting by target OS onto a
+# macOS-constrained instance makes the independent resolution land where the consumer does.
+nix_python_bootstrap_toolchain(
+    name = "python_bootstrap-any",
+    python = ":python",
+)
+
+nix_python_bootstrap_toolchain(
+    name = "python_bootstrap-macos",
+    exec_compatible_with = ["prelude//os/constraints:macos"],
+    python = ":python",
+)
+
+toolchain_alias(
     name = "python_bootstrap",
+    actual = select({
+        "DEFAULT": ":python_bootstrap-any",
+        "prelude//os:macos": ":python_bootstrap-macos",
+    }),
     visibility = ["PUBLIC"],
 )
 

@@ -1,9 +1,9 @@
-"""The devshell's zig, presented the way the prelude's cxx_zig_toolchain wants a distribution.
+"""zig from the flake, presented the way the prelude's cxx_zig_toolchain wants a distribution.
 
-The prelude ships download_zig_distribution (fetch a release from ziglang.org by sha256); here zig
-comes from the flake like every other tool, so this is the same provider pair -- RunInfo for
-`zig` (through bzl/zig-wrapper.sh), ZigDistributionInfo for what it is -- pointed at PATH. Bare name, not a /nix/store path,
-for the reason bzl/java.bzl gives; the version lands in the action key through .buckconfig.local."""
+The prelude ships download_zig_distribution (fetch a release from ziglang.org by sha256); here
+zig is a buck2.nix flake package like every other tool, so this is the same provider pair --
+RunInfo for `zig` (through bzl/zig-wrapper.sh), ZigDistributionInfo for what it is -- built from
+that target. An exec dep: under remote execution it is the worker's zig."""
 
 load("@prelude//toolchains/cxx/zig:defs.bzl", "ZigDistributionInfo")
 
@@ -23,10 +23,10 @@ def _host_os():
         return "macos"
     fail("unsupported host os for zig")
 
-def _system_zig_distribution_impl(ctx):
+def _zig_distribution_impl(ctx):
     return [
         DefaultInfo(),
-        RunInfo(args = [ctx.attrs._wrapper[DefaultInfo].default_outputs[0], ctx.attrs.zig]),
+        RunInfo(args = cmd_args(ctx.attrs._wrapper[DefaultInfo].default_outputs[0], ctx.attrs.zig[RunInfo])),
         ZigDistributionInfo(
             version = ctx.attrs.version,
             arch = _host_arch(),
@@ -34,13 +34,12 @@ def _system_zig_distribution_impl(ctx):
         ),
     ]
 
-system_zig_distribution = rule(
-    impl = _system_zig_distribution_impl,
+zig_distribution = rule(
+    impl = _zig_distribution_impl,
     attrs = {
-        "zig": attrs.string(default = "zig"),
+        "zig": attrs.exec_dep(providers = [RunInfo]),
         # Filters the one rustc link flag zig rejects; see the script.
         "_wrapper": attrs.default_only(attrs.dep(default = "@root//bzl:zig-wrapper.sh")),
-        # Written by `just bootstrap`; "unknown" until then.
-        "version": attrs.string(default = "unknown"),
+        "version": attrs.string(default = ""),
     },
 )

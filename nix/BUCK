@@ -1,0 +1,11 @@
+# The flake that defines the build's tools, as a target: buck2.nix's flake.package() takes it as
+# an input and runs `nix build path:<this dir>#packages.<system>.<name>` in the action, so the
+# lock file is part of every tool's identity.
+filegroup(
+    name = "flake",
+    srcs = [
+        "flake.lock",
+        "flake.nix",
+    ],
+    visibility = ["PUBLIC"],
+)

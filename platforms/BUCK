@@ -1,4 +1,4 @@
-# Target platforms for mccrypt, one per slot in native/src/main/resources. The prelude's
+# Target platforms (what is being built FOR): one per mccrypt slot in native/src/main/resources. The prelude's
 # system_rust_toolchain turns the os/cpu constraints into rustc's --target, and toolchains//:cxx
 # selects the zig cross-linker for the Linux ones.
 #
@@ -6,11 +6,30 @@
 #
 # //mccrypt:cdylib-<slot> pins the cdylib to each of these, and //native:lib packs all three.
 
+# What makes a Linux *shipping* platform different from a Linux *execution* platform with the
+# same os/cpu: the artifact must run on any distribution, so it is linked by zig against glibc
+# 2.17 (toolchains//:cxx selects on this). Binaries that only ever run on our own machines and
+# workers -- build scripts, proc macros -- have no such constraint and get nix's cc.
+constraint_setting(name = "libc")
+
+constraint_value(
+    name = "glibc-2.17",
+    constraint_setting = ":libc",
+    visibility = ["PUBLIC"],
+)
+
+config_setting(
+    name = "portable-linux",
+    constraint_values = [":glibc-2.17", "prelude//os/constraints:linux"],
+    visibility = ["PUBLIC"],
+)
+
 platform(
     name = "linux-x86_64",
     constraint_values = [
         "prelude//os/constraints:linux",
         "prelude//cpu/constraints:x86_64",
+        ":glibc-2.17",
     ],
     visibility = ["PUBLIC"],
 )
@@ -20,6 +39,7 @@ platform(
     constraint_values = [
         "prelude//os/constraints:linux",
         "prelude//cpu/constraints:arm64",
+        ":glibc-2.17",
     ],
     visibility = ["PUBLIC"],
 )
@@ -30,5 +50,39 @@ platform(
         "prelude//os/constraints:macos",
         "prelude//cpu/constraints:arm64",
     ],
+    visibility = ["PUBLIC"],
+)
+
+# ---- execution platforms (where actions run) ----------------------------------------------
+load(":defs.bzl", "execution_platform", "execution_platforms")
+
+RE = read_root_config("re", "enabled", "false").lower() == "true"
+
+execution_platform(
+    name = "local",
+    cpu = "prelude//cpu:" + ("arm64" if host_info().arch.is_aarch64 else "x86_64"),
+    os = "prelude//os:" + ("macos" if host_info().os.is_macos else "linux"),
+    remote_cache = RE,
+)
+
+execution_platform(
+    name = "remote-linux-arm64",
+    cpu = "prelude//cpu:arm64",
+    os = "prelude//os:linux",
+    remote_arch = "arm64",
+)
+
+execution_platform(
+    name = "remote-linux-x86_64",
+    cpu = "prelude//cpu:x86_64",
+    os = "prelude//os:linux",
+    remote_arch = "x86_64",
+)
+
+# Remote first when enabled: anything that can run on a Linux worker does, and only actions
+# whose toolchain is exec-constrained to macOS (the Mach-O link) fall through to local.
+execution_platforms(
+    name = "execution",
+    platforms = ([":remote-linux-arm64", ":remote-linux-x86_64"] if RE else []) + [":local"],
     visibility = ["PUBLIC"],
 )

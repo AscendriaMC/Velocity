@@ -11,31 +11,38 @@ def _java_toolchain_impl(ctx):
     return [
         DefaultInfo(),
         JavaToolchainInfo(
-            java = ctx.attrs.java,
-            javac = ctx.attrs.javac,
-            jar = ctx.attrs.jar,
+            java = ctx.attrs.java[RunInfo],
+            javac = ctx.attrs.javac[RunInfo],
+            jar = ctx.attrs.jar[RunInfo],
             version = ctx.attrs.version,
         ),
     ]
 
-# Tools are bare names resolved from PATH, and the identity of the JDK travels in the action env
-# (via .buckconfig.local) rather than as a /nix/store path in every argv -- a rebuild of the same
-# jdk invalidates nothing, a major bump invalidates everything, which is exactly when javac starts
-# emitting different class files. The consumer instantiates it as toolchains//:java; use
-# read_root_config there so a .buckconfig.local in the project root is what feeds `version`.
+# The tools are targets providing RunInfo -- a nix flake package, a system_tool, anything -- and
+# exec deps, so under cross-compilation and remote execution they are built for the machine that
+# runs the action, not the one the code is for. Their identity is then part of every action's
+# inputs; `version` is only needed for system_tool, whose identity is not (it names a PATH entry).
 java_toolchain = rule(
     impl = _java_toolchain_impl,
     is_toolchain_rule = True,
     attrs = {
-        "java": attrs.string(default = "java"),
-        "javac": attrs.string(default = "javac"),
-        "jar": attrs.string(default = "jar"),
-        # Written by `just bootstrap`; "unknown" until then.
-        "version": attrs.string(default = "unknown"),
+        "java": attrs.exec_dep(providers = [RunInfo]),
+        "javac": attrs.exec_dep(providers = [RunInfo]),
+        "jar": attrs.exec_dep(providers = [RunInfo]),
+        "version": attrs.string(default = ""),
     },
 )
 
-# The consumer defines the toolchain instance as toolchains//:java (see java_toolchain above).
+def _system_tool_impl(ctx):
+    return [DefaultInfo(), RunInfo(args = [ctx.attrs.tool])]
+
+# A tool taken from PATH at action time, for consumers without nix. Not an input of anything:
+# pair it with java_toolchain's `version` so a changed JDK still invalidates.
+system_tool = rule(
+    impl = _system_tool_impl,
+    attrs = {"tool": attrs.string()},
+)
+
 _TOOLCHAIN = attrs.toolchain_dep(default = "toolchains//:java", providers = [JavaToolchainInfo])
 
 JavaLibraryInfo = provider(fields = ["jar"])
@@ -92,8 +99,8 @@ def _java_library_impl(ctx):
 
     cmd = cmd_args([
         ctx.attrs._runner[DefaultInfo].default_outputs[0],
-        tc.javac,
-        tc.jar,
+        cmd_args(tc.javac, delimiter = " "),
+        cmd_args(tc.jar, delimiter = " "),
         classes.as_output(),
         gen.as_output(),
         jar.as_output(),

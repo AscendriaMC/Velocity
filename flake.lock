@@ -19,12 +19,13 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "rust-overlay": "rust-overlay"
+        "tools": "tools"
       }
     },
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
+          "tools",
           "nixpkgs"
         ]
       },
@@ -41,6 +42,23 @@
         "repo": "rust-overlay",
         "type": "github"
       }
+    },
+    "tools": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "path": "./nix",
+        "type": "path"
+      },
+      "original": {
+        "path": "./nix",
+        "type": "path"
+      },
+      "parent": []
     }
   },
   "root": "root",

@@ -108,6 +108,7 @@ mccrypt/jvmtest/out/
 
 # ---- buck2 ----
 /buck-out/
+# .buckconfig.local: per-checkout settings such as `[re] enabled = true`
 /.buckconfig.local
 /.direnv/
 /third-party/rust/.cargo/
