@@ -24,24 +24,6 @@ bootstrap:
 build:
     @buck2 build //api:lib //native:lib //proxy:lib '//mccrypt:mccrypt[cdylib]' //mccrypt:bench --show-simple-output
 
-# Build mccrypt for every slot in native/src/main/resources and install it there, which is what
-# mccrypt/build-native.sh did with cargo + cargo-zigbuild. The Linux slots are cross-built on any
-# host; the macOS slot only on a Mac (no Apple SDK anywhere else).
-natives:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "{{root}}"
-    res=native/src/main/resources
-    cdylib='//mccrypt:mccrypt[cdylib]'
-    buck2 build "$cdylib" --target-platforms //platforms:linux-x86_64  --out "$res/linux_x86_64/velocity-cipher.so"
-    buck2 build "$cdylib" --target-platforms //platforms:linux-aarch64 --out "$res/linux_aarch64/velocity-cipher.so"
-    if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ]; then
-        buck2 build "$cdylib" --target-platforms //platforms:macos-arm64 --out "$res/macos_arm64/velocity-cipher.dylib"
-    else
-        echo "natives: not a Mac, leaving $res/macos_arm64 as is"
-    fi
-    ls -la "$res"/*/velocity-cipher.*
-
 # mccrypt/Cargo.lock -> third-party/rust/BUCK (see reindeer.toml). Re-run after changing
 # mccrypt's dependencies; the diff of the generated file is the review.
 lock-rust:

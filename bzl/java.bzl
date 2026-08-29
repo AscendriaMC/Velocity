@@ -80,6 +80,12 @@ def _java_library_impl(ctx):
             if not p.startswith(prefix):
                 fail("{}: resource {} is not under its declared root {}".format(ctx.label, p, root))
             entries[p[len(prefix):]] = f
+    # Resources at an explicit path in the jar, for artifacts other rules built (the mccrypt
+    # cdylibs land at the slot names Natives.java loads).
+    for path, f in ctx.attrs.resource_files.items():
+        if path in entries:
+            fail("{}: resource path {} given twice".format(ctx.label, path))
+        entries[path] = f
     if entries:
         res = ctx.actions.symlinked_dir("resources", entries)
 
@@ -125,6 +131,8 @@ java_library = rule(
         "srcs": attrs.list(attrs.source(), default = []),
         # root (package-relative) -> files under it
         "resources": attrs.dict(attrs.string(), attrs.list(attrs.source()), default = {}),
+        # path in jar -> file
+        "resource_files": attrs.dict(attrs.string(), attrs.source(), default = {}),
         "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processors": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processor_options": attrs.dict(attrs.string(), attrs.string(), default = {}),

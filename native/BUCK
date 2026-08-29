@@ -1,12 +1,26 @@
 load("//bzl:java.bzl", "java_library")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
-# velocity-native: the compression/cipher loaders plus the prebuilt .so/.dylib they load,
-# including mccrypt's (see mccrypt/README.md).
+# velocity-native: the compression/cipher loaders plus the prebuilt .so/.dylib they load.
+#
+# The cipher slots Natives.java tries first ("/<platform>/velocity-cipher.*") are filled from
+# buck2's own mccrypt builds rather than from the files checked in under src/main/resources --
+# those stay as they are for gradle, and the buck2 jar always carries the cdylibs built from the
+# mccrypt sources in this tree, for all three platforms, whatever host it is built on.
+MCCRYPT_SLOTS = {
+    "linux_aarch64/velocity-cipher.so": "//mccrypt:cdylib-linux_aarch64[cdylib]",
+    "linux_x86_64/velocity-cipher.so": "//mccrypt:cdylib-linux_x86_64[cdylib]",
+    "macos_arm64/velocity-cipher.dylib": "//mccrypt:cdylib-macos_arm64[cdylib]",
+}
+
 java_library(
     name = "lib",
     srcs = glob(["src/main/java/**/*.java"]),
-    resources = {"src/main/resources": glob(["src/main/resources/**"])},
+    resources = {"src/main/resources": glob(
+        ["src/main/resources/**"],
+        exclude = ["src/main/resources/" + slot for slot in MCCRYPT_SLOTS],
+    )},
+    resource_files = MCCRYPT_SLOTS,
     deps = CLASSPATHS["velocity-native"]["compileClasspath"],
     visibility = ["PUBLIC"],
 )

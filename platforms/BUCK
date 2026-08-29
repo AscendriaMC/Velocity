@@ -4,7 +4,7 @@
 #
 #   buck2 build '//mccrypt:mccrypt[cdylib]' --target-platforms //platforms:linux-x86_64
 #
-# `just natives` builds every slot and installs the results.
+# //mccrypt:cdylib-<slot> pins the cdylib to each of these, and //native:lib packs all three.
 
 platform(
     name = "linux-x86_64",

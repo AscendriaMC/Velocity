@@ -30,3 +30,19 @@ rust_binary(
     # Same strategy as the library: an unwinding binary cannot link a panic=abort rlib.
     rustc_flags = ["-Cpanic=abort"],
 )
+
+# The three resource slots, each the cdylib built for that platform regardless of the platform
+# the consumer is being built for. //native:lib puts them at the paths Natives.java loads.
+[
+    configured_alias(
+        name = "cdylib-" + slot,
+        actual = ":mccrypt",
+        platform = "//platforms:" + platform,
+        visibility = ["PUBLIC"],
+    )
+    for slot, platform in [
+        ("linux_x86_64", "linux-x86_64"),
+        ("linux_aarch64", "linux-aarch64"),
+        ("macos_arm64", "macos-arm64"),
+    ]
+]
