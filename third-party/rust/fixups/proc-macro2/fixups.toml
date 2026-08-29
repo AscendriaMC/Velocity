@@ -1,0 +1,3 @@
+# Probes rustc for which proc_macro APIs exist and turns the answer into cfgs; run it so the
+# cfgs track whatever rustc the devshell provides.
+buildscript.run = true

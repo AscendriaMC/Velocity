@@ -17,9 +17,14 @@ bootstrap:
     } > .buckconfig.local
     echo "wrote .buckconfig.local (jdk $jdk_version)"
 
-# compile every module
+# compile every module, and mccrypt
 build:
-    @buck2 build //api:lib //native:lib //proxy:lib --show-simple-output
+    @buck2 build //api:lib //native:lib //proxy:lib //mccrypt:mccrypt --show-simple-output
+
+# mccrypt/Cargo.lock -> third-party/rust/BUCK (see reindeer.toml). Re-run after changing
+# mccrypt's dependencies; the diff of the generated file is the review.
+lock-rust:
+    @reindeer buckify
 
 # Ask gradle -- the resolver upstream actually uses -- for the resolved graph of every module,
 # then regenerate third-party/jvm/{BUCK,classpaths.bzl} from it. Re-run after an upstream merge

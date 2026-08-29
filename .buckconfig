@@ -1,9 +1,31 @@
 [cells]
   root = .
   prelude = prelude
+  toolchains = toolchains
+  none = none
+
+# The prelude that ships inside the buck2 binary. It is what reindeer's generated rules
+# (cargo.rust_library, buildscript_run, http_archive) are written against; the java rules in
+# bzl/ do not use it, but they run fine on its platforms.
+[external_cells]
+  prelude = bundled
+
+[cell_aliases]
+  config = prelude
+  ovr_config = prelude
+  fbcode = none
+  fbsource = none
+  buck = none
+
+[parser]
+  target_platform_detector_spec = target:root//...->prelude//platforms:default
 
 [build]
-  execution_platforms = root//toolchains:platforms
+  execution_platforms = prelude//platforms:default
+
+[rust]
+  default_edition = 2021
+  remap_src_paths = yes
 
 [project]
   # Top-level entries only -- that is all this buck2 prunes (see season-two's note on the same

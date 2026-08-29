@@ -1,13 +1,31 @@
-load(":defs.bzl", "java_toolchain", "platforms")
+# Toolchains the bundled prelude's rules look up by these exact names. All "system_" flavours:
+# rustc, cc and python3 come from PATH, i.e. from the devshell.
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
+load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
+load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
 
-platforms(name = "platforms")
+system_rust_toolchain(
+    name = "rust",
+    default_edition = "2021",
+    # The only crate that matters for speed is mccrypt's kernels; the rest is JNI typedefs and
+    # a proc macro. Set here so it is one flag, not one per target.
+    rustc_flags = ["-Copt-level=3"],
+    visibility = ["PUBLIC"],
+)
 
-# Root cell on purpose: read_config is per-cell.
-java_toolchain(
-    name = "java",
-    java = read_config("java", "java", "java"),
-    javac = read_config("java", "javac", "javac"),
-    jar = read_config("java", "jar", "jar"),
-    version = read_config("java", "toolchain_version", "unknown"),
+system_cxx_toolchain(
+    name = "cxx",
+    visibility = ["PUBLIC"],
+)
+
+# Build scripts are run through a small python driver in the prelude.
+system_python_bootstrap_toolchain(
+    name = "python_bootstrap",
+    visibility = ["PUBLIC"],
+)
+
+system_genrule_toolchain(
+    name = "genrule",
     visibility = ["PUBLIC"],
 )

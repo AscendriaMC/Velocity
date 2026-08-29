@@ -1,0 +1,3 @@
+# Emits `no_diagnostic_namespace` only for rustc older than 1.78; run it anyway so it stays
+# correct if the toolchain ever moves the other way.
+buildscript.run = true

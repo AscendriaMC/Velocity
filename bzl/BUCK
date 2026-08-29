@@ -1,4 +1,13 @@
-load("//bzl:java.bzl", "export_file")
+load("//bzl:java.bzl", "export_file", "java_toolchain")
+
+java_toolchain(
+    name = "java",
+    java = read_config("java", "java", "java"),
+    javac = read_config("java", "javac", "javac"),
+    jar = read_config("java", "jar", "jar"),
+    version = read_config("java", "toolchain_version", "unknown"),
+    visibility = ["PUBLIC"],
+)
 
 export_file(
     name = "javac.sh",

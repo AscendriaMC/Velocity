@@ -18,6 +18,11 @@
             # Upstream builds with a 25 toolchain and the class files say so; the rules take
             # javac/jar/java from PATH, so this is the only place the version is chosen.
             jdk25
+            # mccrypt. rustc/cargo are what the prelude's system rust toolchain finds on PATH;
+            # reindeer turns mccrypt/Cargo.lock into third-party/rust/BUCK (`just lock-rust`).
+            rustc
+            cargo
+            reindeer
           ];
 
           shellHook = ''
@@ -32,6 +37,7 @@
             echo "velocity devshell — jdk $(java -version 2>&1 | head -1 | sed 's/.*version "\([^"]*\)".*/\1/')"
             echo "  just build         compile every module through buck2"
             echo "  just lock          re-resolve with gradle and regenerate third-party/jvm"
+            echo "  just lock-rust     regenerate third-party/rust from mccrypt/Cargo.lock (reindeer)"
           '';
         };
       });

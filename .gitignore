@@ -110,3 +110,5 @@ mccrypt/jvmtest/out/
 /buck-out/
 /.buckconfig.local
 /.direnv/
+/third-party/rust/.cargo/
+/third-party/rust/target/

@@ -5,9 +5,37 @@ of every configuration, and third-party/jvm/classpaths.bzl carries those flat li
 `deps` IS its classpath, in gradle's order. Keeping the graph flat is what lets the generated
 part stay a mechanical transcription of gradle's answer instead of a second resolver."""
 
-load("//toolchains:defs.bzl", "JavaToolchainInfo")
+JavaToolchainInfo = provider(fields = ["java", "javac", "jar", "version"])
 
-_TOOLCHAIN = attrs.toolchain_dep(default = "//toolchains:java", providers = [JavaToolchainInfo])
+def _java_toolchain_impl(ctx):
+    return [
+        DefaultInfo(),
+        JavaToolchainInfo(
+            java = ctx.attrs.java,
+            javac = ctx.attrs.javac,
+            jar = ctx.attrs.jar,
+            version = ctx.attrs.version,
+        ),
+    ]
+
+# Tools are bare names resolved from PATH, and the identity of the JDK travels in the action env
+# (via .buckconfig.local) rather than as a /nix/store path in every argv -- a rebuild of the same
+# jdk invalidates nothing, a major bump invalidates everything, which is exactly when javac starts
+# emitting different class files. Lives in the ROOT cell (//bzl:java, not toolchains//) because
+# read_config is per cell and .buckconfig.local is the root's.
+java_toolchain = rule(
+    impl = _java_toolchain_impl,
+    is_toolchain_rule = True,
+    attrs = {
+        "java": attrs.string(default = "java"),
+        "javac": attrs.string(default = "javac"),
+        "jar": attrs.string(default = "jar"),
+        # Written by `just bootstrap`; "unknown" until then.
+        "version": attrs.string(default = "unknown"),
+    },
+)
+
+_TOOLCHAIN = attrs.toolchain_dep(default = "//bzl:java", providers = [JavaToolchainInfo])
 
 JavaLibraryInfo = provider(fields = ["jar"])
 
