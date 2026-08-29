@@ -1,0 +1,2 @@
+# jvm//: JVM rules and the jar assembly tool. See rules/java.bzl. Nothing here loads from any
+# other cell; the consumer provides toolchains//:java.

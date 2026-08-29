@@ -3,6 +3,9 @@
   prelude = prelude
   toolchains = toolchains
   none = none
+  # The JVM rules + the jar assembly tool. Written to be lifted out into their own repository
+  # (and consumed as an external cell) -- nothing in jvm// may load from root// or prelude//.
+  jvm = jvm
 
 # The prelude that ships inside the buck2 binary. It is what reindeer's generated rules
 # (cargo.rust_library, buildscript_run, http_archive) are written against; the java rules in

@@ -1,4 +1,4 @@
-load("//bzl:java.bzl", "java_library")
+load("@jvm//rules:java.bzl", "jar_assembly", "java_library")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-proxy, compiled. Not yet the shaded jar: no relocation, no log4j plugin-cache
@@ -15,5 +15,31 @@ java_library(
         "log4j.graalvm.groupId": "com.velocitypowered",
         "log4j.graalvm.artifactId": "velocity-proxy",
     },
+    visibility = ["PUBLIC"],
+)
+
+# The shipped proxy jar, what shadowJar produces in gradle. Same relocation, exclusion and log4j
+# plugin-cache merge; on top of that META-INF/services are merged rather than first-wins (gradle
+# silently keeps only the first jar's providers) and module-info.class files are dropped.
+# Implementation-Version comes from gradle.properties, the one place the version is written.
+jar_assembly(
+    name = "all",
+    inputs = [":lib", "//api:lib", "//native:lib"]
+        + CLASSPATHS["velocity-proxy"]["runtimeClasspath"]
+        + ["//proxy/deprecated/configurate3:configurate3"],
+    relocations = {"org.bstats": "com.velocitypowered.proxy.bstats"},
+    excludes = ["org/checkerframework/checker/**"],
+    merges = {
+        "META-INF/services/**": "services",
+        "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat": "log4j2-plugin-cache",
+    },
+    main_class = "com.velocitypowered.proxy.Velocity",
+    manifest = {
+        "Implementation-Title": "Velocity",
+        "Implementation-Vendor": "Velocity Contributors",
+        "Multi-Release": "true",
+        "Enable-Native-Access": "ALL-UNNAMED",
+    },
+    manifest_from_properties = {"Implementation-Version": ("//:gradle.properties", "version")},
     visibility = ["PUBLIC"],
 )

@@ -21,8 +21,8 @@ def _java_toolchain_impl(ctx):
 # Tools are bare names resolved from PATH, and the identity of the JDK travels in the action env
 # (via .buckconfig.local) rather than as a /nix/store path in every argv -- a rebuild of the same
 # jdk invalidates nothing, a major bump invalidates everything, which is exactly when javac starts
-# emitting different class files. Lives in the ROOT cell (//bzl:java, not toolchains//) because
-# read_config is per cell and .buckconfig.local is the root's.
+# emitting different class files. The consumer instantiates it as toolchains//:java; use
+# read_root_config there so a .buckconfig.local in the project root is what feeds `version`.
 java_toolchain = rule(
     impl = _java_toolchain_impl,
     is_toolchain_rule = True,
@@ -35,7 +35,8 @@ java_toolchain = rule(
     },
 )
 
-_TOOLCHAIN = attrs.toolchain_dep(default = "//bzl:java", providers = [JavaToolchainInfo])
+# The consumer defines the toolchain instance as toolchains//:java (see java_toolchain above).
+_TOOLCHAIN = attrs.toolchain_dep(default = "toolchains//:java", providers = [JavaToolchainInfo])
 
 JavaLibraryInfo = provider(fields = ["jar"])
 
@@ -137,7 +138,92 @@ java_library = rule(
         "processors": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processor_options": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "javac_flags": attrs.list(attrs.string(), default = []),
-        "_runner": attrs.default_only(attrs.dep(default = "//bzl:javac.sh")),
+        "_runner": attrs.default_only(attrs.dep(default = "@jvm//rules:javac.sh")),
+        "_toolchain": _TOOLCHAIN,
+    },
+)
+
+JavaBinaryInfo = provider(fields = ["main_class", "classpath"])
+
+def _java_binary_impl(ctx):
+    # Flat, like everything else here: `deps` is the runtime classpath, in order.
+    return [
+        DefaultInfo(),
+        JavaBinaryInfo(main_class = ctx.attrs.main_class, classpath = _jars(ctx.attrs.deps)),
+    ]
+
+java_binary = rule(
+    impl = _java_binary_impl,
+    attrs = {
+        "main_class": attrs.string(),
+        "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
+    },
+)
+
+def _jar_assembly_impl(ctx):
+    """One jar out of many, the shadow way: see tools/jartool for the semantics of each line."""
+    tc = ctx.attrs._toolchain[JavaToolchainInfo]
+    tool = ctx.attrs._tool[JavaBinaryInfo]
+    out = ctx.actions.declare_output(ctx.label.name + ".jar")
+
+    lines = []
+    for d in ctx.attrs.inputs:
+        lines.append(cmd_args("in", d[JavaLibraryInfo].jar, delimiter = "\t"))
+    for src, dst in ctx.attrs.relocations.items():
+        excludes = ctx.attrs.relocation_excludes.get(src, [])
+        lines.append(cmd_args(["relocate", src, dst] + excludes, delimiter = "\t"))
+    for g in ctx.attrs.excludes:
+        lines.append(cmd_args("exclude", g, delimiter = "\t"))
+    for g, policy in ctx.attrs.merges.items():
+        lines.append(cmd_args("merge", g, policy, delimiter = "\t"))
+    lines.append(cmd_args("duplicates", ctx.attrs.duplicates, delimiter = "\t"))
+    lines.append(cmd_args("module-info", ctx.attrs.module_info, delimiter = "\t"))
+    lines.append(cmd_args("strip-signatures", "true" if ctx.attrs.strip_signatures else "false", delimiter = "\t"))
+    if ctx.attrs.main_class:
+        lines.append(cmd_args("main-class", ctx.attrs.main_class, delimiter = "\t"))
+    for k, v in ctx.attrs.manifest.items():
+        lines.append(cmd_args("manifest", k, v, delimiter = "\t"))
+    for k, (f, key) in ctx.attrs.manifest_from_properties.items():
+        lines.append(cmd_args("manifest-from-properties", f, key, k, delimiter = "\t"))
+
+    plan, _ = ctx.actions.write("plan.txt", lines, allow_args = True)
+    # Everything the plan names, declared as inputs of the command that reads it.
+    inputs = [d[JavaLibraryInfo].jar for d in ctx.attrs.inputs]
+    inputs += [f for f, _ in ctx.attrs.manifest_from_properties.values()]
+    cmd = cmd_args(
+        [tc.java, "-cp", cmd_args(tool.classpath, delimiter = ":"), tool.main_class,
+         "--plan", plan, "--out", out.as_output()],
+        hidden = inputs,
+    )
+    ctx.actions.run(
+        cmd,
+        category = "jar_assembly",
+        identifier = ctx.label.name,
+        env = {"JAVA_TOOLCHAIN_VERSION": tc.version},
+    )
+    return [DefaultInfo(default_output = out), JavaLibraryInfo(jar = out)]
+
+jar_assembly = rule(
+    impl = _jar_assembly_impl,
+    attrs = {
+        # Jars, in classpath order; the order decides `first`/`last`.
+        "inputs": attrs.list(attrs.dep(providers = [JavaLibraryInfo])),
+        # "org.bstats": "com.velocitypowered.proxy.bstats"
+        "relocations": attrs.dict(attrs.string(), attrs.string(), default = {}),
+        # from-package -> globs over dotted class names that stay put
+        "relocation_excludes": attrs.dict(attrs.string(), attrs.list(attrs.string()), default = {}),
+        # Ant globs over entry paths
+        "excludes": attrs.list(attrs.string(), default = []),
+        # glob -> first | last | error | services | append | log4j2-plugin-cache
+        "merges": attrs.dict(attrs.string(), attrs.string(), default = {}),
+        "duplicates": attrs.enum(["first", "last", "error"], default = "first"),
+        "module_info": attrs.enum(["drop", "keep"], default = "drop"),
+        "strip_signatures": attrs.bool(default = True),
+        "main_class": attrs.option(attrs.string(), default = None),
+        "manifest": attrs.dict(attrs.string(), attrs.string(), default = {}),
+        # "Implementation-Version": (properties file, "version")
+        "manifest_from_properties": attrs.dict(attrs.string(), attrs.tuple(attrs.source(), attrs.string()), default = {}),
+        "_tool": attrs.default_only(attrs.exec_dep(default = "@jvm//tools/jartool:jartool", providers = [JavaBinaryInfo])),
         "_toolchain": _TOOLCHAIN,
     },
 )

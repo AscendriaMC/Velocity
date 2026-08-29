@@ -1,4 +1,4 @@
-load("//bzl:java.bzl", "java_library")
+load("@jvm//rules:java.bzl", "java_library")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-api. src/ap is the @Plugin annotation processor, compiled into the same jar as

@@ -1,0 +1,7 @@
+load("//rules:java.bzl", "export_file")
+
+export_file(
+    name = "javac.sh",
+    src = "javac.sh",
+    visibility = ["PUBLIC"],
+)

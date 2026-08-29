@@ -1,4 +1,4 @@
-load("//bzl:java.bzl", "java_library")
+load("@jvm//rules:java.bzl", "java_library")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-native: the compression/cipher loaders plus the prebuilt .so/.dylib they load.

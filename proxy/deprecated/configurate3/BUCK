@@ -1,0 +1,16 @@
+load("@jvm//rules:java.bzl", "jar_assembly")
+load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
+
+# Configurate 3 bundled for plugins that still use it, the same way proxy/deprecated/configurate3
+# 's shadowJar does: its runtime closure minus the libraries the proxy already carries at newer
+# versions. Not relocated -- ninja.leaping.configurate does not clash with configurate 4.
+jar_assembly(
+    name = "configurate3",
+    inputs = CLASSPATHS["deprecated-configurate3"]["runtimeClasspath"],
+    excludes = [
+        "com/google/**",
+        "com/typesafe/**",
+        "org/yaml/**",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -1,11 +1,23 @@
 # Toolchains the bundled prelude's rules look up by these exact names. rustc and python3 come
 # from PATH, i.e. from the devshell; the C toolchain depends on what is being built FOR.
+load("@jvm//rules:java.bzl", "java_toolchain")
 load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
 load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
 load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
 load("@prelude//toolchains/cxx/zig:defs.bzl", "cxx_zig_toolchain")
 load("@root//bzl:zig.bzl", "system_zig_distribution")
+
+# javac/jar/java from PATH; the JDK's identity comes from the root .buckconfig.local that
+# `just bootstrap` writes, hence read_root_config rather than read_config.
+java_toolchain(
+    name = "java",
+    java = read_root_config("java", "java", "java"),
+    javac = read_root_config("java", "javac", "javac"),
+    jar = read_root_config("java", "jar", "jar"),
+    version = read_root_config("java", "toolchain_version", "unknown"),
+    visibility = ["PUBLIC"],
+)
 
 # rustc_target_triple defaults to a select on the target platform's os/cpu, which is what makes
 # //platforms:linux-* produce Linux code with no per-target configuration here.
