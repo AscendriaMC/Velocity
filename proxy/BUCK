@@ -1,0 +1,19 @@
+load("//bzl:java.bzl", "java_library")
+load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
+
+# velocity-proxy, compiled. Not yet the shaded jar: no relocation, no log4j plugin-cache
+# merge, no manifest, no configurate3 bundle -- see proxy/build.gradle.kts for what shadowJar
+# still does on top of this.
+java_library(
+    name = "lib",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = {"src/main/resources": glob(["src/main/resources/**"])},
+    deps = ["//api:lib", "//native:lib"] + CLASSPATHS["velocity-proxy"]["compileClasspath"],
+    processors = CLASSPATHS["velocity-proxy"]["annotationProcessor"],
+    # Same -A flags upstream passes: log4j's GraalVmProcessor names its reflect-config by them.
+    processor_options = {
+        "log4j.graalvm.groupId": "com.velocitypowered",
+        "log4j.graalvm.artifactId": "velocity-proxy",
+    },
+    visibility = ["PUBLIC"],
+)

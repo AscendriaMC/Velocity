@@ -1,0 +1,13 @@
+load("//bzl:java.bzl", "java_library")
+load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
+
+# velocity-api. src/ap is the @Plugin annotation processor, compiled into the same jar as
+# upstream's sourceSets["main"].java.srcDir("src/ap/java") does.
+java_library(
+    name = "lib",
+    srcs = glob(["src/main/java/**/*.java", "src/ap/java/**/*.java"]),
+    resources = {"src/ap/resources": glob(["src/ap/resources/**"])},
+    deps = CLASSPATHS["velocity-api"]["compileClasspath"],
+    processors = CLASSPATHS["velocity-api"]["annotationProcessor"],
+    visibility = ["PUBLIC"],
+)

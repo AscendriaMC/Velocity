@@ -1,0 +1,15 @@
+[cells]
+  root = .
+  prelude = prelude
+
+[build]
+  execution_platforms = root//toolchains:platforms
+
+[project]
+  # Top-level entries only -- that is all this buck2 prunes (see season-two's note on the same
+  # key). Gradle's per-module build/ dirs are not declared inputs, so their churn is noise, not
+  # rebuilds.
+  ignore = .jj, .git, .direnv, .gradle, .gradle-home, build, buck-out, .idea, mccrypt/target
+
+[buck2]
+  file_watcher = notify

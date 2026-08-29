@@ -1,0 +1,12 @@
+load("//bzl:java.bzl", "java_library")
+load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
+
+# velocity-native: the compression/cipher loaders plus the prebuilt .so/.dylib they load,
+# including mccrypt's (see mccrypt/README.md).
+java_library(
+    name = "lib",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = {"src/main/resources": glob(["src/main/resources/**"])},
+    deps = CLASSPATHS["velocity-native"]["compileClasspath"],
+    visibility = ["PUBLIC"],
+)

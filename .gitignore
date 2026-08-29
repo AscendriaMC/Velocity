@@ -105,3 +105,8 @@ mccrypt/jvmtest/out/
 # The unrooted `bin/` rule above (IDE output) also swallows Cargo's binary
 # directory, which would silently drop the bench from every commit.
 !mccrypt/src/bin/
+
+# ---- buck2 ----
+/buck-out/
+/.buckconfig.local
+/.direnv/
