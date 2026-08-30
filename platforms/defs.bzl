@@ -24,6 +24,10 @@ def _execution_platform_impl(ctx):
                 "OSFamily": "linux",
                 "arch": ctx.attrs.remote_arch,
                 "container-image": "",
+                # The scheduler treats cpu_count as a consumable slot (the worker advertises nproc
+                # of them); without it every queued action runs at once and a cold build is
+                # sixty rustc and javac processes on one container.
+                "cpu_count": "1",
             },
             remote_execution_use_case = "buck2-default",
             remote_output_paths = "output_paths",
