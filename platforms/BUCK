@@ -6,21 +6,28 @@
 #
 # //mccrypt:cdylib-<slot> pins the cdylib to each of these, and //native:lib packs all three.
 
-# What makes a Linux *shipping* platform different from a Linux *execution* platform with the
-# same os/cpu: the artifact must run on any distribution, so it is linked by zig against glibc
-# 2.17 (toolchains//:cxx selects on this). Binaries that only ever run on our own machines and
-# workers -- build scripts, proc macros -- have no such constraint and get nix's cc.
-constraint_setting(name = "libc")
+# What makes a *shipping* platform different from an *execution* platform with the same os/cpu:
+# the artifact must run on any machine of that os -- any Linux distribution, any Mac -- so it is
+# linked by zig (glibc 2.17 on Linux), from any host. toolchains//:cxx selects on this. Binaries
+# that only ever run on our own machines and workers -- build scripts, proc macros -- have no
+# such constraint and get nix's cc for the platform they run on.
+constraint_setting(name = "portability")
 
 constraint_value(
-    name = "glibc-2.17",
-    constraint_setting = ":libc",
+    name = "portable",
+    constraint_setting = ":portability",
     visibility = ["PUBLIC"],
 )
 
 config_setting(
     name = "portable-linux",
-    constraint_values = [":glibc-2.17", "prelude//os/constraints:linux"],
+    constraint_values = [":portable", "prelude//os/constraints:linux"],
+    visibility = ["PUBLIC"],
+)
+
+config_setting(
+    name = "portable-macos",
+    constraint_values = [":portable", "prelude//os/constraints:macos"],
     visibility = ["PUBLIC"],
 )
 
@@ -29,7 +36,7 @@ platform(
     constraint_values = [
         "prelude//os/constraints:linux",
         "prelude//cpu/constraints:x86_64",
-        ":glibc-2.17",
+        ":portable",
     ],
     visibility = ["PUBLIC"],
 )
@@ -39,7 +46,7 @@ platform(
     constraint_values = [
         "prelude//os/constraints:linux",
         "prelude//cpu/constraints:arm64",
-        ":glibc-2.17",
+        ":portable",
     ],
     visibility = ["PUBLIC"],
 )
@@ -49,6 +56,7 @@ platform(
     constraint_values = [
         "prelude//os/constraints:macos",
         "prelude//cpu/constraints:arm64",
+        ":portable",
     ],
     visibility = ["PUBLIC"],
 )

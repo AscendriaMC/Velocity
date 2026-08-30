@@ -8,9 +8,8 @@ load("@nix//:flake.bzl", "flake")
 load("@nix//toolchains:python.bzl", "nix_python_bootstrap_toolchain")
 load("@nix//toolchains:rust.bzl", "nix_rust_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
-load("@prelude//toolchains/cxx/zig:defs.bzl", "cxx_zig_toolchain")
 load("@root//bzl:nix_cxx.bzl", "nix_cxx_toolchain")
-load("@root//bzl:zig.bzl", "zig_distribution")
+load("@root//bzl:zig.bzl", "zig_cxx_toolchain")
 
 # ---- packages ------------------------------------------------------------------------------
 # local_only = False: the nix build may run on a remote worker. That is only sound because the
@@ -106,32 +105,35 @@ nix_rust_toolchain(
 
 # The C toolchain is what rustc links through (-Clinker=), and there are two kinds of link:
 #
-#   * the shipping cdylibs for //platforms:linux-* (constraint :glibc-2.17): `zig cc -target
-#     <triple>-linux-gnu.2.17`, the glibc floor build-native.sh used with cargo-zigbuild, so the
-#     artifacts run on any distribution. zig 0.16 accepts everything rustc 1.98 puts on a
-#     linux-gnu link line except one flag, which bzl/zig-wrapper.sh drops;
-#   * everything else -- build scripts, proc macros, bench, the macOS slot -- links with nix's
-#     cc for the platform it runs on. A worker has no /lib/ld-linux, so a glibc-2.17 link of a
-#     build script would not even start there; nix's cc produces binaries that run on nix.
+#   * the shipping cdylibs, //platforms:{linux-*,macos-*} (constraint :portable): `zig cc
+#     -target <triple>`, glibc 2.17 on Linux -- the floor build-native.sh used with cargo-zigbuild
+#     -- so the artifacts run on any machine of that os, and cross-linked from any host, so a
+#     Linux worker produces the macOS slot too and a build can be entirely remote;
+#   * everything else -- build scripts, proc macros, bench -- links with nix's cc for the
+#     platform it runs on. A worker has no /lib/ld-linux, so a glibc-2.17 link of a build script
+#     would not even start there; nix's cc produces binaries that run on nix.
 #
-# The macOS instance is exec-constrained to macOS: a Mach-O link cannot happen on a Linux
-# worker, so under remote execution it is the one kind of step that stays local. (The
-# same nested-resolution reason as python_bootstrap below.)
-zig_distribution(
-    name = "zig-dist",
+# The macOS instance of the latter is exec-constrained to macOS (a native Mach-O link needs a
+# Mac) and is only ever selected when the local platform is the execution platform.
+zig_cxx_toolchain(
+    name = "cxx-zig-linux-x86_64",
+    nix_cc = ":nix_cc",
+    target = "x86_64-linux-gnu.2.17",
     zig = ":zig",
 )
 
-cxx_zig_toolchain(
-    name = "cxx-zig-linux-x86_64",
-    distribution = ":zig-dist",
-    target = "x86_64-linux-gnu.2.17",
+zig_cxx_toolchain(
+    name = "cxx-zig-linux-aarch64",
+    nix_cc = ":nix_cc",
+    target = "aarch64-linux-gnu.2.17",
+    zig = ":zig",
 )
 
-cxx_zig_toolchain(
-    name = "cxx-zig-linux-aarch64",
-    distribution = ":zig-dist",
-    target = "aarch64-linux-gnu.2.17",
+zig_cxx_toolchain(
+    name = "cxx-zig-macos-aarch64",
+    nix_cc = ":nix_cc",
+    target = "aarch64-macos",
+    zig = ":zig",
 )
 
 nix_cxx_toolchain(
@@ -148,12 +150,15 @@ nix_cxx_toolchain(
 toolchain_alias(
     name = "cxx",
     actual = select({
-        "DEFAULT": ":cxx-nix-any",
         "@root//platforms:portable-linux": select({
             "prelude//cpu:arm64": ":cxx-zig-linux-aarch64",
             "prelude//cpu:x86_64": ":cxx-zig-linux-x86_64",
         }),
-        "prelude//os:macos": ":cxx-nix-macos",
+        "@root//platforms:portable-macos": ":cxx-zig-macos-aarch64",
+        "DEFAULT": select({
+            "DEFAULT": ":cxx-nix-any",
+            "prelude//os:macos": ":cxx-nix-macos",
+        }),
     }),
     visibility = ["PUBLIC"],
 )
@@ -161,9 +166,10 @@ toolchain_alias(
 # Build scripts and rustc itself are driven through small python scripts in the prelude. The
 # prelude reaches this toolchain through a nested one (rust/tools:internal_tools_toolchain), and
 # nested toolchains pick their execution platform on their own -- first compatible -- rather than
-# following the consumer, so with remote platforms listed first a proc macro linked on this Mac
-# (macOS target, Mach-O linker) would be handed a Linux python. Selecting by target OS onto a
-# macOS-constrained instance makes the independent resolution land where the consumer does.
+# following the consumer. Consumers of the macOS-constrained C toolchain above (macOS target,
+# not portable, i.e. a local build) would otherwise be handed a Linux python; selecting a
+# macOS-constrained instance for exactly that configuration makes the two resolutions agree.
+# Portable targets resolve wherever their zig link does, so they take the unconstrained one.
 nix_python_bootstrap_toolchain(
     name = "python_bootstrap-any",
     python = ":python",
@@ -178,8 +184,12 @@ nix_python_bootstrap_toolchain(
 toolchain_alias(
     name = "python_bootstrap",
     actual = select({
-        "DEFAULT": ":python_bootstrap-any",
-        "prelude//os:macos": ":python_bootstrap-macos",
+        "@root//platforms:portable-linux": ":python_bootstrap-any",
+        "@root//platforms:portable-macos": ":python_bootstrap-any",
+        "DEFAULT": select({
+            "DEFAULT": ":python_bootstrap-any",
+            "prelude//os:macos": ":python_bootstrap-macos",
+        }),
     }),
     visibility = ["PUBLIC"],
 )

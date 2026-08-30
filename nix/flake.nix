@@ -24,10 +24,11 @@
       packages = forAll (pkgs: {
         # Upstream builds with a 25 toolchain and the class files say so.
         jdk = pkgs.jdk25;
-        # rustc + cargo + rust-std for the host and for the two Linux cross targets. Linking
-        # for those is zig's job; rustc only needs their std.
+        # rustc + cargo + rust-std for the host and for every shipping slot, so any machine --
+        # a Linux worker included -- can compile for all three. Linking is zig's job; rustc only
+        # needs their std.
         rust = pkgs.rust-bin.stable.latest.minimal.override {
-          targets = [ "x86_64-unknown-linux-gnu" "aarch64-unknown-linux-gnu" ];
+          targets = [ "x86_64-unknown-linux-gnu" "aarch64-unknown-linux-gnu" "aarch64-apple-darwin" ];
         };
         # The cross linker for the Linux cdylib slots.
         zig = pkgs.zig;
