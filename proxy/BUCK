@@ -31,7 +31,7 @@ IMPLEMENTATION_VERSION = read_root_config("velocity", "implementation_version", 
 
 jar_assembly(
     name = "all",
-    inputs = [":lib", "//api:lib", "//native:lib"]
+    inputs = [":lib", "//api:lib", "//native:jar"]
         + CLASSPATHS["velocity-proxy"]["runtimeClasspath"]
         + ["//proxy/deprecated/configurate3:configurate3"],
     relocations = {"org.bstats": "com.velocitypowered.proxy.bstats"},

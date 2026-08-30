@@ -20,6 +20,7 @@ import java.util.Properties;
  *
  * <pre>
  *   in              PATH                      an input jar; order matters
+ *   file            PATH-IN-JAR  FILE        a single file, at that path
  *   relocate        FROM  TO  [EXCLUDE-GLOB...]  package prefix to move, excludes over dotted names
  *   exclude         GLOB                      drop matching entries (matched before relocation)
  *   merge           GLOB  POLICY              first | last | error | services | append | log4j2-plugin-cache
@@ -55,6 +56,7 @@ public final class Main {
       String[] f = line.split("\t");
       switch (f[0]) {
         case "in" -> assembler.inputs.add(Path.of(f[1]));
+        case "file" -> assembler.files.put(f[1], Path.of(f[2]));
         case "relocate" -> {
           List<Glob> excludes = new ArrayList<>();
           for (int i = 3; i < f.length; i++) {

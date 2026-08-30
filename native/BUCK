@@ -1,7 +1,10 @@
-load("@jvm//rules:java.bzl", "java_library")
+load("@jvm//rules:java.bzl", "jar_assembly", "java_library")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
-# velocity-native: the compression/cipher loaders plus the prebuilt .so/.dylib they load.
+# velocity-native, in two targets on purpose: :lib is the classes plus the checked-in natives,
+# and is what //proxy:lib compiles against; :jar adds the cipher slots buck2 builds itself and
+# is what the shipped jar bundles. Compiling against :jar would put every javac behind the whole
+# rust chain (proc macro, jni-sys, three cdylib links) for resources that javac never reads.
 #
 # The cipher slots Natives.java tries first ("/<platform>/velocity-cipher.*") are filled from
 # buck2's own mccrypt builds rather than from the files checked in under src/main/resources --
@@ -20,7 +23,13 @@ java_library(
         ["src/main/resources/**"],
         exclude = ["src/main/resources/" + slot for slot in MCCRYPT_SLOTS],
     )},
-    resource_files = MCCRYPT_SLOTS,
     deps = CLASSPATHS["velocity-native"]["compileClasspath"],
+    visibility = ["PUBLIC"],
+)
+
+jar_assembly(
+    name = "jar",
+    inputs = [":lib"],
+    resource_files = MCCRYPT_SLOTS,
     visibility = ["PUBLIC"],
 )

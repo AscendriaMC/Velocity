@@ -88,12 +88,6 @@ def _java_library_impl(ctx):
             if not p.startswith(prefix):
                 fail("{}: resource {} is not under its declared root {}".format(ctx.label, p, root))
             entries[p[len(prefix):]] = f
-    # Resources at an explicit path in the jar, for artifacts other rules built (the mccrypt
-    # cdylibs land at the slot names Natives.java loads).
-    for path, f in ctx.attrs.resource_files.items():
-        if path in entries:
-            fail("{}: resource path {} given twice".format(ctx.label, path))
-        entries[path] = f
     if entries:
         res = ctx.actions.symlinked_dir("resources", entries)
 
@@ -139,8 +133,6 @@ java_library = rule(
         "srcs": attrs.list(attrs.source(), default = []),
         # root (package-relative) -> files under it
         "resources": attrs.dict(attrs.string(), attrs.list(attrs.source()), default = {}),
-        # path in jar -> file
-        "resource_files": attrs.dict(attrs.string(), attrs.source(), default = {}),
         "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processors": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processor_options": attrs.dict(attrs.string(), attrs.string(), default = {}),
@@ -176,6 +168,8 @@ def _jar_assembly_impl(ctx):
     lines = []
     for d in ctx.attrs.inputs:
         lines.append(cmd_args("in", d[JavaLibraryInfo].jar, delimiter = "\t"))
+    for path, f in ctx.attrs.resource_files.items():
+        lines.append(cmd_args("file", path, f, delimiter = "\t"))
     for src, dst in ctx.attrs.relocations.items():
         excludes = ctx.attrs.relocation_excludes.get(src, [])
         lines.append(cmd_args(["relocate", src, dst] + excludes, delimiter = "\t"))
@@ -196,6 +190,7 @@ def _jar_assembly_impl(ctx):
     plan, _ = ctx.actions.write("plan.txt", lines, allow_args = True)
     # Everything the plan names, declared as inputs of the command that reads it.
     inputs = [d[JavaLibraryInfo].jar for d in ctx.attrs.inputs]
+    inputs += ctx.attrs.resource_files.values()
     inputs += [f for f, _ in ctx.attrs.manifest_from_properties.values()]
     cmd = cmd_args(
         [tc.java, "-cp", cmd_args(tool.classpath, delimiter = ":"), tool.main_class,
@@ -215,6 +210,9 @@ jar_assembly = rule(
     attrs = {
         # Jars, in classpath order; the order decides `first`/`last`.
         "inputs": attrs.list(attrs.dep(providers = [JavaLibraryInfo])),
+        # path in jar -> file, for artifacts other rules built (the mccrypt cdylibs land at the
+        # slot names Natives.java loads)
+        "resource_files": attrs.dict(attrs.string(), attrs.source(), default = {}),
         # "org.bstats": "com.velocitypowered.proxy.bstats"
         "relocations": attrs.dict(attrs.string(), attrs.string(), default = {}),
         # from-package -> globs over dotted class names that stay put

@@ -20,9 +20,9 @@ nothing in here loads from `root//` or `prelude//`.
 |---|---|
 | `remote_jar(url, sha256)` | a jar fetched by checksum |
 | `prebuilt_jar(jar)` | a jar already in the tree |
-| `java_library(srcs, resources, resource_files, deps, processors, processor_options, javac_flags)` | javac + jar; `resources` = {root: files}, `resource_files` = {path-in-jar: file} |
+| `java_library(srcs, resources, deps, processors, processor_options, javac_flags)` | javac + jar; `resources` = {root: files} |
 | `java_binary(main_class, deps)` | a main class and its classpath (a provider, not a launcher) |
-| `jar_assembly(inputs, relocations, relocation_excludes, excludes, merges, duplicates, module_info, strip_signatures, main_class, manifest, manifest_from_properties)` | one jar from many; see below |
+| `jar_assembly(inputs, resource_files, relocations, relocation_excludes, excludes, merges, duplicates, module_info, strip_signatures, main_class, manifest, manifest_from_properties)` | one jar from many; see below |
 
 ## jar_assembly
 
@@ -33,6 +33,8 @@ What Gradle's shadow plugin does, as a build step with declared inputs and deter
   constants naming the package in dotted or slashed form (reflection needs that; an unrelated
   string that starts with the package moves too). Applies under `META-INF/versions/N/` as well.
   `relocation_excludes` are globs over dotted class names that stay put.
+- **resource_files** `{path-in-jar: file}` — loose files at explicit paths (built artifacts, e.g.
+  native libraries at the names a loader expects).
 - **excludes** — Ant globs over entry paths, matched before relocation.
 - **merges** `{glob: policy}` — what to do when several inputs provide the same entry:
   `first` (shadow's default), `last`, `error`, `services` (union of providers),
@@ -43,6 +45,9 @@ What Gradle's shadow plugin does, as a build step with declared inputs and deter
   `Multi-Release: true` added automatically when versioned entries exist.
 - Signature files are stripped and `module-info.class` dropped unless told otherwise.
 - Output entries are sorted and timestamped 1980-02-01, so identical inputs give identical bytes.
+- Entries that come through unchanged are copied as stored -- never inflated -- and only
+  rewritten or merged entries are compressed, in parallel; the tool has its own zip reader and
+  writer for that (plain zip: no zip64, fails loudly past 65535 entries or 4 GiB).
 
 The tool itself (`tools/jartool`) is ~500 lines of Java on ASM, built by these same rules; its
 plan format is documented in `Main.java`.
