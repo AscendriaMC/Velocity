@@ -3,7 +3,7 @@
 # Every tool is a package of nix/flake.nix, built by buck2.nix's flake.package on whichever
 # machine runs the action -- this Mac for the local execution platform, a remote worker for
 # the remote ones -- so the same BUCK file serves both, and a worker needs nothing but nix.
-load("@jvm//rules:java.bzl", "java_toolchain")
+load("@jvm//rules:java.bzl", "java_toolchain", "javac_worker")
 load("@nix//:flake.bzl", "flake")
 load("@nix//toolchains:python.bzl", "nix_python_bootstrap_toolchain")
 load("@nix//toolchains:rust.bzl", "nix_rust_toolchain")
@@ -80,11 +80,29 @@ flake.package(
 
 # ---- toolchains ----------------------------------------------------------------------------
 
+# The persistent-worker experiment: -c re.workers=true attaches a Bazel-protocol javac worker
+# to every compile action; the scheduler then keeps one warm JVM per worker key instead of paying
+# JVM start + cold JIT per action. The one-shot path stays byte-identical.
+javac_worker(
+    name = "javac-worker",
+    java = ":jdk[java]",
+)
+
+# What compiles the compile tool itself; must not carry the worker (that would be a cycle).
+java_toolchain(
+    name = "java_bootstrap",
+    java = ":jdk[java]",
+    javac = ":jdk[javac]",
+    jar = ":jdk[jar]",
+    visibility = ["PUBLIC"],
+)
+
 java_toolchain(
     name = "java",
     java = ":jdk[java]",
     javac = ":jdk[javac]",
     jar = ":jdk[jar]",
+    worker = ":javac-worker" if read_root_config("re", "workers", "false").lower() == "true" else None,
     visibility = ["PUBLIC"],
 )
 

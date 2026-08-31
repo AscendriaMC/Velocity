@@ -5,7 +5,9 @@ of every configuration, and third-party/jvm/classpaths.bzl carries those flat li
 `deps` IS its classpath, in gradle's order. Keeping the graph flat is what lets the generated
 part stay a mechanical transcription of gradle's answer instead of a second resolver."""
 
-JavaToolchainInfo = provider(fields = ["java", "javac", "jar", "version"])
+JavaToolchainInfo = provider(fields = ["java", "javac", "jar", "worker", "version"])
+
+JavaBinaryInfo = provider(fields = ["main_class", "classpath"])
 
 def _java_toolchain_impl(ctx):
     return [
@@ -14,6 +16,7 @@ def _java_toolchain_impl(ctx):
             java = ctx.attrs.java[RunInfo],
             javac = ctx.attrs.javac[RunInfo],
             jar = ctx.attrs.jar[RunInfo],
+            worker = ctx.attrs.worker,
             version = ctx.attrs.version,
         ),
     ]
@@ -29,6 +32,11 @@ java_toolchain = rule(
         "java": attrs.exec_dep(providers = [RunInfo]),
         "javac": attrs.exec_dep(providers = [RunInfo]),
         "jar": attrs.exec_dep(providers = [RunInfo]),
+        # A Bazel-protocol persistent worker for the compile step (javac_worker below); when
+        # set, compile actions attach it and a capable executor keeps the JVM warm across
+        # actions. Off by default; the one-shot path is always the fallback and produces the
+        # same bytes.
+        "worker": attrs.option(attrs.exec_dep(providers = [WorkerInfo]), default = None),
         "version": attrs.string(default = ""),
     },
 )
@@ -71,6 +79,51 @@ prebuilt_jar = rule(
 def _jars(deps):
     return [d[JavaLibraryInfo].jar for d in deps]
 
+def _java_bootstrap_library_impl(ctx):
+    """Plain javac + the jar CLI. The compile tool itself (jartool, javacworker) cannot be
+    compiled by the compile tool; everything else uses java_library, whose worker/one-shot
+    runner produces deterministic jars. A separate rule rather than a flag because the
+    dependency edge to the tool exists per rule, not per branch."""
+    tc = ctx.attrs._toolchain[JavaToolchainInfo]
+    classes = ctx.actions.declare_output("classes", dir = True)
+    gen = ctx.actions.declare_output("gen", dir = True)
+    jar = ctx.actions.declare_output(ctx.label.name + ".jar")
+    cmd = cmd_args([
+        ctx.attrs._runner[DefaultInfo].default_outputs[0],
+        cmd_args(tc.javac, delimiter = " "),
+        cmd_args(tc.jar, delimiter = " "),
+        classes.as_output(),
+        gen.as_output(),
+        jar.as_output(),
+        "-",
+        "--",
+        "-encoding", "UTF-8",
+        "-nowarn",
+        "-implicit:none",
+        "-proc:none",
+    ])
+    if ctx.attrs.deps:
+        cmd.add("-cp", cmd_args(_jars(ctx.attrs.deps), delimiter = ":"))
+    cmd.add(ctx.attrs.srcs)
+    ctx.actions.run(cmd, category = "javac", identifier = ctx.label.name,
+                    env = {"JAVA_TOOLCHAIN_VERSION": tc.version})
+    return [
+        DefaultInfo(default_output = jar, other_outputs = [classes, gen]),
+        JavaLibraryInfo(jar = jar),
+    ]
+
+java_bootstrap_library = rule(
+    impl = _java_bootstrap_library_impl,
+    attrs = {
+        "srcs": attrs.list(attrs.source(), default = []),
+        "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
+        "_runner": attrs.default_only(attrs.dep(default = "@jvm//rules:javac.sh")),
+        # A worker-less toolchain instance, or the worker's own compiler needs the worker:
+        # toolchains//:java -> javac-worker -> javacworker -> jartool:lib -> toolchains//:java.
+        "_toolchain": attrs.toolchain_dep(default = "toolchains//:java_bootstrap", providers = [JavaToolchainInfo]),
+    },
+)
+
 def _java_library_impl(ctx):
     tc = ctx.attrs._toolchain[JavaToolchainInfo]
     classes = ctx.actions.declare_output("classes", dir = True)
@@ -91,33 +144,52 @@ def _java_library_impl(ctx):
     if entries:
         res = ctx.actions.symlinked_dir("resources", entries)
 
-    cmd = cmd_args([
-        ctx.attrs._runner[DefaultInfo].default_outputs[0],
-        cmd_args(tc.javac, delimiter = " "),
-        cmd_args(tc.jar, delimiter = " "),
-        classes.as_output(),
-        gen.as_output(),
-        jar.as_output(),
-        res if res else "-",
-        "--",
-        "-encoding", "UTF-8",
-        "-nowarn",
-        "-implicit:none",
-    ])
+    tool = ctx.attrs._tool[JavaBinaryInfo]
+    plan = [
+        cmd_args("--classes", classes.as_output(), delimiter = "\n"),
+        cmd_args("--gen", gen.as_output(), delimiter = "\n"),
+        cmd_args("--jar", jar.as_output(), delimiter = "\n"),
+    ]
+    if res:
+        plan.append(cmd_args("--res", res, delimiter = "\n"))
+    plan.append("--")
+    plan += ["-encoding", "UTF-8", "-nowarn", "-implicit:none"]
     if ctx.attrs.deps:
-        cmd.add("-cp", cmd_args(_jars(ctx.attrs.deps), delimiter = ":"))
+        plan += ["-cp", cmd_args(_jars(ctx.attrs.deps), delimiter = ":")]
     if ctx.attrs.processors:
-        cmd.add("-proc:full")
-        cmd.add("-processorpath", cmd_args(_jars(ctx.attrs.processors), delimiter = ":"))
+        plan += ["-proc:full", "-processorpath", cmd_args(_jars(ctx.attrs.processors), delimiter = ":")]
         for k, v in ctx.attrs.processor_options.items():
-            cmd.add("-A{}={}".format(k, v))
+            plan.append("-A{}={}".format(k, v))
     else:
-        cmd.add("-proc:none")
-    cmd.add(ctx.attrs.javac_flags)
-    cmd.add(ctx.attrs.srcs)
+        plan.append("-proc:none")
+    plan += ctx.attrs.javac_flags
+    plan += ctx.attrs.srcs
+    plan_file, plan_extras = ctx.actions.write("javac.plan", plan, allow_args = True)
 
+    # One token per line in the plan; the command is the tool plus @plan, which is also the
+    # shape the Bazel persistent-worker protocol requires (everything behind one @argfile).
+    # The executable goes through run()'s `exe` -- as a WorkerRunInfo when a worker is
+    # attached, so a capable executor keeps the JVM across actions and everyone else falls
+    # back to the same one-shot command.
+    exe_cmd = cmd_args(tc.java, "-cp", cmd_args(tool.classpath, delimiter = ":"), tool.main_class)
+    worker_inputs = []
+    if tc.worker != None:
+        worker_info = tc.worker[WorkerInfo]
+        exe = WorkerRunInfo(worker = worker_info, exe = exe_cmd)
+        # The worker's launcher (and everything it references) must be materialised in every
+        # action's sandbox: the executor canonicalises the worker argv against it at spawn.
+        worker_inputs = [worker_info.exe]
+    else:
+        exe = RunInfo(args = exe_cmd)
+    cmd = cmd_args(
+        cmd_args(plan_file, format = "@{}"),
+        # `plan` rides along hidden for two reasons: the output bindings (--classes/--gen/--jar
+        # exist only inside the argfile) and the input artifacts the file references.
+        hidden = [plan, plan_extras, ctx.attrs.srcs, _jars(ctx.attrs.deps), _jars(ctx.attrs.processors)] + worker_inputs + ([res] if res else []),
+    )
     ctx.actions.run(
         cmd,
+        exe = exe,
         category = "javac",
         identifier = ctx.label.name,
         env = {"JAVA_TOOLCHAIN_VERSION": tc.version},
@@ -137,12 +209,11 @@ java_library = rule(
         "processors": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
         "processor_options": attrs.dict(attrs.string(), attrs.string(), default = {}),
         "javac_flags": attrs.list(attrs.string(), default = []),
-        "_runner": attrs.default_only(attrs.dep(default = "@jvm//rules:javac.sh")),
+        "_tool": attrs.default_only(attrs.exec_dep(default = "@jvm//tools/javacworker:javacworker", providers = [JavaBinaryInfo])),
         "_toolchain": _TOOLCHAIN,
     },
 )
 
-JavaBinaryInfo = provider(fields = ["main_class", "classpath"])
 
 def _java_binary_impl(ctx):
     # Flat, like everything else here: `deps` is the runtime classpath, in order.
@@ -156,6 +227,55 @@ java_binary = rule(
     attrs = {
         "main_class": attrs.string(),
         "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
+    },
+)
+
+def _javac_worker_impl(ctx):
+    tool = ctx.attrs.tool[JavaBinaryInfo]
+    java = ctx.attrs.java[RunInfo]
+
+    # A single self-locating launcher, because of how a pooled remote worker is spawned: the
+    # executor canonicalises argv[0] against the action's sandbox but passes the remaining
+    # startup arguments through untouched, and runs the process from its own root -- so a
+    # relative `-cp` never resolves. The script derives the sandbox root from its own realpath
+    # (everything of ours lives under buck-out/) and execs with absolute paths; the JVM holds
+    # the jars as open file descriptors, so the worker outlives the sandbox it started in.
+    script, _ = ctx.actions.write(
+        "worker.sh",
+        cmd_args(
+            "#!/bin/sh",
+            'SELF="$(realpath "$0")"',
+            'ROOT="${SELF%%/buck-out/*}"',
+            cmd_args(
+                'exec "$ROOT/',
+                cmd_args(java, delimiter = ""),
+                '" -cp "',
+                cmd_args(tool.classpath, format = '$ROOT/{}', delimiter = ":"),
+                '" ',
+                tool.main_class,
+                ' "$@"',
+                delimiter = "",
+            ),
+            delimiter = "\n",
+        ),
+        is_executable = True,
+        allow_args = True,
+    )
+    return [
+        DefaultInfo(default_output = script),
+        WorkerInfo(
+            exe = cmd_args(script, hidden = [java, tool.classpath]),
+            supports_bazel_remote_persistent_worker_protocol = True,
+        ),
+    ]
+
+# The executor spawns exe + `--persistent_worker` once per key (key = this argv), then streams
+# WorkRequests; buck2 keys the remote pool by the digest of these inputs.
+javac_worker = rule(
+    impl = _javac_worker_impl,
+    attrs = {
+        "java": attrs.exec_dep(providers = [RunInfo]),
+        "tool": attrs.exec_dep(providers = [JavaBinaryInfo], default = "@jvm//tools/javacworker:javacworker"),
     },
 )
 

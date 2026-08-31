@@ -31,6 +31,9 @@ def _execution_platform_impl(ctx):
             },
             remote_execution_use_case = "buck2-default",
             remote_output_paths = "output_paths",
+            # Only takes effect for actions that carry a WorkerInfo (the javac worker); the
+            # client then sends the Bazel worker properties and rewrites argv to exe + @argfile.
+            use_bazel_protocol_remote_persistent_workers = True,
         )
     else:
         executor = CommandExecutorConfig(

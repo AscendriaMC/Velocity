@@ -1,0 +1,16 @@
+load("//rules:java.bzl", "java_binary", "java_bootstrap_library")
+
+# javac + deterministic jar, as one binary that is both the action's one-shot runner and a Bazel
+# persistent worker (--persistent_worker). Depends on jartool's lib only for ZipWriter.
+java_bootstrap_library(
+    name = "lib",
+    srcs = glob(["src/**/*.java"]),
+    deps = ["//tools/jartool:lib"],
+)
+
+java_binary(
+    name = "javacworker",
+    main_class = "dev.ascendria.javacworker.Main",
+    deps = [":lib", "//tools/jartool:lib"],
+    visibility = ["PUBLIC"],
+)

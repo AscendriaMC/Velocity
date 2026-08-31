@@ -19,7 +19,7 @@ import java.util.List;
  * entry carries the same fixed timestamp. Plain zip: fails rather than silently truncating past
  * 65535 entries or 4 GiB.
  */
-final class ZipWriter implements Closeable {
+public final class ZipWriter implements Closeable {
   private record Central(String name, int method, long crc, long csize, long usize, long offset) {}
 
   private final OutputStream out;
@@ -28,17 +28,17 @@ final class ZipWriter implements Closeable {
   private final int dosDate;
   private long offset = 0;
 
-  ZipWriter(Path path, LocalDateTime timestamp) throws IOException {
+  public ZipWriter(Path path, LocalDateTime timestamp) throws IOException {
     out = new BufferedOutputStream(Files.newOutputStream(path), 1 << 16);
     dosTime = (timestamp.getHour() << 11) | (timestamp.getMinute() << 5) | (timestamp.getSecond() / 2);
     dosDate = ((timestamp.getYear() - 1980) << 9) | (timestamp.getMonthValue() << 5) | timestamp.getDayOfMonth();
   }
 
-  void directory(String name) throws IOException {
+  public void directory(String name) throws IOException {
     add(name, ZipReader.STORED, 0, 0, 0, new byte[0]);
   }
 
-  void add(String name, int method, long crc, long csize, long usize, byte[] data) throws IOException {
+  public void add(String name, int method, long crc, long csize, long usize, byte[] data) throws IOException {
     if (data.length != csize) {
       throw new IOException(name + ": compressed size " + csize + " but " + data.length + " bytes given");
     }

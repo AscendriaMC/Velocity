@@ -1,13 +1,15 @@
-load("//rules:java.bzl", "java_binary", "java_library")
+load("//rules:java.bzl", "java_binary", "java_bootstrap_library")
 
 # Assembles one jar from many: relocation (ASM), entry filters, merge policies (services, log4j2
 # plugin cache, append), generated manifest, deterministic output. Driven by jar_assembly.
 ASM = ["//third-party:asm", "//third-party:asm-tree", "//third-party:asm-commons"]
 
-java_library(
+java_bootstrap_library(
     name = "lib",
     srcs = glob(["src/**/*.java"]),
     deps = ASM,
+    # javacworker links against ZipWriter for its deterministic jars.
+    visibility = ["//tools/..."],
 )
 
 java_binary(
