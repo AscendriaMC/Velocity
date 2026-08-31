@@ -2,19 +2,23 @@
 
 root := justfile_directory()
 
+# The buck2 to drive the build with. The devshell's by default; export BUCK2 (e.g. in
+# .envrc.local) to run every build through a different buck2 binary instead.
+buck2 := env("BUCK2", "buck2")
+
 _default:
     @just --list --unsorted
 
 # the shipped proxy jar (which builds every module), and mccrypt
 build:
-    @buck2 build //proxy:all '//mccrypt:mccrypt[cdylib]' //mccrypt:bench --show-simple-output
+    @{{buck2}} build //proxy:all '//mccrypt:mccrypt[cdylib]' //mccrypt:bench --show-simple-output
 
 # Any buck2 command with the remote workers as execution platforms, e.g.
 # `just re build //proxy:all`. Needs RE configured. Actions run on the Linux workers except the
 # Mach-O link of the macOS cipher slot, which is exec-constrained to macOS and stays here; the
 # tools the workers use come out of nix/flake.nix, built on the worker the first time.
 re *args:
-    @buck2 {{args}} -c re.enabled=true
+    @{{buck2}} {{args}} -c re.enabled=true
 
 # The proxy jar with the revision stamped into Implementation-Version, the way upstream's
 # gradle build stamps snapshots: "<version> (git-<rev>)", plus the jj bookmark when there is
@@ -33,7 +37,7 @@ release:
     fi
     stamp="$version (git-$rev${bookmark:+, $bookmark})"
     mkdir -p dist
-    buck2 build //proxy:all -c "velocity.implementation_version=$stamp" --out dist/velocity-proxy-all.jar
+    ${BUCK2:-buck2} build //proxy:all -c "velocity.implementation_version=$stamp" --out dist/velocity-proxy-all.jar
     echo "dist/velocity-proxy-all.jar: $(unzip -p dist/velocity-proxy-all.jar META-INF/MANIFEST.MF | grep Implementation-Version)"
 
 # mccrypt/Cargo.lock -> third-party/rust/BUCK (see reindeer.toml). Re-run after changing

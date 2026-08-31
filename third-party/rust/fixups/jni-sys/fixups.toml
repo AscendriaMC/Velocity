@@ -1,3 +1,0 @@
-# 0.3.1's build.rs only links libjvm when _JNI_SYS_TEST is set (its own test suite); for a
-# consumer it emits nothing but a check-cfg. 0.4.1 has no build script at all.
-buildscript.run = false

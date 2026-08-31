@@ -20,8 +20,10 @@ bench = false
 
 [dependencies]
 # Types + the JNIEnv vtable only. No linking against libjvm: the JVM resolves our
-# symbols, not the other way around.
-jni-sys = "0.3"
+# symbols, not the other way around. Pinned to 0.3.0 exactly: 0.3.1 is a re-export shim over
+# 0.4.x, which drags a proc macro (jni-sys-macros -> syn) into what is otherwise a
+# five-crate-smaller build for a header file'"'"'s worth of typedefs.
+jni-sys = "=0.3.0"
 
 [profile.release]
 opt-level = 3

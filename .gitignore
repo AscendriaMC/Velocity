@@ -114,3 +114,4 @@ mccrypt/jvmtest/out/
 /third-party/rust/.cargo/
 /third-party/rust/target/
 /dist/
+/.envrc.local
