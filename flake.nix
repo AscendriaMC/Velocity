@@ -10,14 +10,22 @@
       url = "path:./nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # The test executor buck2 runs (see [test] v2_test_executor). Its own flake, because it is
+    # headed for its own repository; until then, editing it means `nix flake update junit-runner`
+    # before the devshell sees the change.
+    junit-runner = {
+      url = "path:./jvm/tools/junit-runner";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, tools }:
+  outputs = { self, nixpkgs, tools, junit-runner }:
     let
       systems = [ "aarch64-darwin" "x86_64-darwin" "aarch64-linux" "x86_64-linux" ];
-      forAll = f: nixpkgs.lib.genAttrs systems (s: f nixpkgs.legacyPackages.${s} tools.packages.${s});
+      forAll = f: nixpkgs.lib.genAttrs systems (s: f nixpkgs.legacyPackages.${s} tools.packages.${s} junit-runner.packages.${s});
+
     in {
-      devShells = forAll (pkgs: t: {
+      devShells = forAll (pkgs: t: runner: {
         default = pkgs.mkShell {
           packages = with pkgs; [
             buck2
@@ -31,6 +39,8 @@
             t.python
             # reindeer turns mccrypt/Cargo.lock into third-party/rust/BUCK (`just lock-rust`).
             reindeer
+            # `buck2 test` runs this; .buckconfig names it and finds it here on PATH.
+            runner.junit-runner
           ];
 
           shellHook = ''
@@ -40,6 +50,7 @@
             echo "  just build         compile every module through buck2"
             echo "  just lock          re-resolve with gradle and regenerate third-party/jvm"
             echo "  just lock-rust     regenerate third-party/rust from mccrypt/Cargo.lock (reindeer)"
+            echo "  just test          every test, reported per test"
             echo "  just re <cmd>      the same, on remote workers (needs RE configured)"
           '';
         };

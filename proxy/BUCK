@@ -1,4 +1,4 @@
-load("@jvm//rules:java.bzl", "jar_assembly", "java_library")
+load("@jvm//rules:java.bzl", "jar_assembly", "java_library", "java_test")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-proxy, compiled. Not yet the shaded jar: no relocation, no log4j plugin-cache
@@ -51,4 +51,33 @@ jar_assembly(
         "Implementation-Version": ("//:gradle.properties", "version"),
     },
     visibility = ["PUBLIC"],
+)
+
+# Mockito must be handed the agent: self-attachment is gone on the JDK this builds with.
+java_library(
+    name = "test-lib",
+    srcs = glob(["src/test/java/**/*.java"]),
+    # log4j2-test.xml, which keeps the proxy's file appender out of the test run.
+    resources = {"src/test/resources": glob(["src/test/resources/**"])},
+    deps = [":lib", "//api:lib", "//native:lib"] + CLASSPATHS["velocity-proxy"]["testRuntimeClasspath"],
+)
+
+java_test(
+    name = "test",
+    main_class = "org.junit.platform.console.ConsoleLauncher",
+    # `buck2 test //...` otherwise drags in the prelude's own trivially-passing targets (every
+    # reindeer .crate download carries ExternalRunnerTestInfo); --include junit selects ours.
+    labels = ["junit"],
+    # //native:jar, not :lib -- BatchingCipherEncoderTest assumes its way out when the native
+    # cipher is not the batching one, and the cdylibs that make it so are in the jar. Compiling
+    # the tests still goes against :lib, so javac stays off the rust chain.
+    deps = [":test-lib", ":lib", "//api:lib", "//native:jar"] + CLASSPATHS["velocity-proxy"]["testRuntimeClasspath"],
+    jvm_flags = ["-javaagent:$(location //third-party/jvm:net.bytebuddy__byte-buddy-agent__1.17.7)"],
+    args = [
+        "execute",
+        "--scan-classpath=$(location :test-lib)",
+        "--fail-if-no-tests",
+        "--disable-ansi-colors",
+        "--details=summary",
+    ],
 )

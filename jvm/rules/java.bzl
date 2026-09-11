@@ -230,6 +230,58 @@ java_binary = rule(
     },
 )
 
+def _java_test_impl(ctx):
+    """A JVM run, as a target you can `buck2 run`.
+
+    Not a compile step: the tests are an ordinary java_library, and this is the command that puts
+    a JVM in front of them. Knowing nothing about JUnit is the point -- `main_class` and `args`
+    name whatever runner the repo has on the classpath, so the rule stays as generic as the rest
+    of this cell. Same flat-classpath rule as everywhere else: `deps` IS the classpath, in order.
+    """
+    tc = ctx.attrs._toolchain[JavaToolchainInfo]
+    jars = _jars(ctx.attrs.deps)
+    cmd = cmd_args(
+        tc.java,
+        ctx.attrs.jvm_flags,
+        "-cp",
+        cmd_args(jars, delimiter = ":"),
+        ctx.attrs.main_class,
+        ctx.attrs.args,
+        hidden = jars,
+    )
+    return [
+        DefaultInfo(),
+        RunInfo(args = cmd),
+        # The same command again, for `buck2 test`. Without this the target is invisible to it --
+        # and `buck2 test //...` still says "Tests finished: Pass 1" off the prelude's own
+        # trivially-passing targets, so the absence does not look like an absence.
+        ExternalRunnerTestInfo(
+            type = ctx.attrs.test_type,
+            command = [cmd],
+            labels = ctx.attrs.labels,
+            run_from_project_root = True,
+            use_project_relative_paths = True,
+        ),
+    ]
+
+# Deliberately not folded into java_binary: that one is depended on by the compile toolchain
+# itself (javacworker), and giving it a toolchain_dep would close the cycle the bootstrap
+# toolchain exists to break.
+java_test = rule(
+    impl = _java_test_impl,
+    attrs = {
+        "main_class": attrs.string(),
+        "deps": attrs.list(attrs.dep(providers = [JavaLibraryInfo]), default = []),
+        # $(location ...) works here: a javaagent path, a classpath root to scan.
+        "jvm_flags": attrs.list(attrs.arg(), default = []),
+        "args": attrs.list(attrs.arg(), default = []),
+        # What `buck2 test` reports the target as, and what its selectors filter on.
+        "test_type": attrs.string(default = "junit"),
+        "labels": attrs.list(attrs.string(), default = []),
+        "_toolchain": _TOOLCHAIN,
+    },
+)
+
 def _javac_worker_impl(ctx):
     tool = ctx.attrs.tool[JavaBinaryInfo]
     java = ctx.attrs.java[RunInfo]

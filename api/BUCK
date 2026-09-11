@@ -1,4 +1,4 @@
-load("@jvm//rules:java.bzl", "java_library")
+load("@jvm//rules:java.bzl", "java_library", "java_test")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-api. src/ap is the @Plugin annotation processor, compiled into the same jar as
@@ -10,4 +10,26 @@ java_library(
     deps = CLASSPATHS["velocity-api"]["compileClasspath"],
     processors = CLASSPATHS["velocity-api"]["annotationProcessor"],
     visibility = ["PUBLIC"],
+)
+
+java_library(
+    name = "test-lib",
+    srcs = glob(["src/test/java/**/*.java"]),
+    deps = [":lib"] + CLASSPATHS["velocity-api"]["testRuntimeClasspath"],
+)
+
+java_test(
+    name = "test",
+    main_class = "org.junit.platform.console.ConsoleLauncher",
+    # `buck2 test //...` otherwise drags in the prelude's own trivially-passing targets (every
+    # reindeer .crate download carries ExternalRunnerTestInfo); --include junit selects ours.
+    labels = ["junit"],
+    deps = [":test-lib", ":lib"] + CLASSPATHS["velocity-api"]["testRuntimeClasspath"],
+    args = [
+        "execute",
+        "--scan-classpath=$(location :test-lib)",
+        "--fail-if-no-tests",
+        "--disable-ansi-colors",
+        "--details=summary",
+    ],
 )

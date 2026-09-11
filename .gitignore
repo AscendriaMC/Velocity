@@ -101,6 +101,7 @@ native/libdeflate
 # artifact (see mccrypt/README.md), so it is tracked like the other natives.
 # mccrypt (Rust cipher kernel)
 mccrypt/target/
+jvm/tools/junit-runner/target/
 mccrypt/jvmtest/out/
 # The unrooted `bin/` rule above (IDE output) also swallows Cargo's binary
 # directory, which would silently drop the bench from every commit.

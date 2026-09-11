@@ -835,6 +835,14 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
+# org.junit.platform:junit-platform-console:6.1.2
+remote_jar(
+    name = "org.junit.platform__junit-platform-console__6.1.2",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.1.2/junit-platform-console-6.1.2.jar",
+    sha256 = "5735a840f9b679296a8fcd7b54185ca903a29503fd8952df63bba0f27307f427",
+    visibility = ["PUBLIC"],
+)
+
 # org.junit.platform:junit-platform-engine:6.1.2
 remote_jar(
     name = "org.junit.platform__junit-platform-engine__6.1.2",
@@ -848,6 +856,14 @@ remote_jar(
     name = "org.junit.platform__junit-platform-launcher__6.1.2",
     url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.1.2/junit-platform-launcher-6.1.2.jar",
     sha256 = "858197212c1b2acc257c9eec9b450a31923c61c1bc61e66acf0057d57bbe577a",
+    visibility = ["PUBLIC"],
+)
+
+# org.junit.platform:junit-platform-reporting:6.1.2
+remote_jar(
+    name = "org.junit.platform__junit-platform-reporting__6.1.2",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.1.2/junit-platform-reporting-6.1.2.jar",
+    sha256 = "61706512382e1d71a2e425246e4380076c908b4698bbe09148061bdc2b34e24a",
     visibility = ["PUBLIC"],
 )
 
@@ -872,6 +888,14 @@ remote_jar(
     name = "org.objenesis__objenesis__3.3",
     url = "https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.jar",
     sha256 = "02dfd0b0439a5591e35b708ed2f5474eb0948f53abf74637e959b8e4ef69bfeb",
+    visibility = ["PUBLIC"],
+)
+
+# org.opentest4j.reporting:open-test-reporting-tooling-spi:0.2.5
+remote_jar(
+    name = "org.opentest4j.reporting__open-test-reporting-tooling-spi__0.2.5",
+    url = "https://repo.maven.apache.org/maven2/org/opentest4j/reporting/open-test-reporting-tooling-spi/0.2.5/open-test-reporting-tooling-spi-0.2.5.jar",
+    sha256 = "df237b68847637747f0bfdb88fa9cdd9c72cc85550fad0c41ddb33869a5ca516",
     visibility = ["PUBLIC"],
 )
 

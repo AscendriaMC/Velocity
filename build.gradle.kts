@@ -18,6 +18,9 @@ subprojects {
 
     dependencies {
         testImplementation(rootProject.libs.junit)
+        // Only so it lands in testRuntimeClasspath, which is what third-party/jvm is generated
+        // from: buck2's java_test runs the tests through this CLI. Gradle uses its own launcher.
+        testRuntimeOnly(rootProject.libs.junit.console)
     }
 
     testing.suites.named<JvmTestSuite>("test") {

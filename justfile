@@ -13,6 +13,10 @@ _default:
 build:
     @{{buck2}} build //proxy:all '//mccrypt:mccrypt[cdylib]' //mccrypt:bench --show-simple-output
 
+# every test in the repo, or under a pattern
+test pattern="//...":
+    @{{buck2}} test {{pattern}}
+
 # Any buck2 command with the remote workers as execution platforms, e.g.
 # `just re build //proxy:all`. Needs RE configured. Actions run on the Linux workers except the
 # Mach-O link of the macOS cipher slot, which is exec-constrained to macOS and stays here; the

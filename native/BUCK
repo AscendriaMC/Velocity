@@ -1,4 +1,4 @@
-load("@jvm//rules:java.bzl", "jar_assembly", "java_library")
+load("@jvm//rules:java.bzl", "jar_assembly", "java_library", "java_test")
 load("//third-party/jvm:classpaths.bzl", "CLASSPATHS")
 
 # velocity-native, in two targets on purpose: :lib is the classes plus the checked-in natives,
@@ -32,4 +32,28 @@ jar_assembly(
     inputs = [":lib"],
     resource_files = MCCRYPT_SLOTS,
     visibility = ["PUBLIC"],
+)
+
+# Against :jar rather than :lib: these tests load the native cipher out of the jar's
+# resources, and :jar is the one carrying the mccrypt cdylibs this tree builds.
+java_library(
+    name = "test-lib",
+    srcs = glob(["src/test/java/**/*.java"]),
+    deps = [":jar"] + CLASSPATHS["velocity-native"]["testRuntimeClasspath"],
+)
+
+java_test(
+    name = "test",
+    main_class = "org.junit.platform.console.ConsoleLauncher",
+    # `buck2 test //...` otherwise drags in the prelude's own trivially-passing targets (every
+    # reindeer .crate download carries ExternalRunnerTestInfo); --include junit selects ours.
+    labels = ["junit"],
+    deps = [":test-lib", ":jar"] + CLASSPATHS["velocity-native"]["testRuntimeClasspath"],
+    args = [
+        "execute",
+        "--scan-classpath=$(location :test-lib)",
+        "--fail-if-no-tests",
+        "--disable-ansi-colors",
+        "--details=summary",
+    ],
 )

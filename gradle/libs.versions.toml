@@ -35,6 +35,8 @@ flare-fastutil = { module = "space.vectrix.flare:flare-fastutil", version.ref = 
 jline = "org.jline:jline-terminal-ffm:4.4.8"
 jopt = "net.sf.jopt-simple:jopt-simple:5.0.4"
 junit = "org.junit.jupiter:junit-jupiter:6.1.3"
+# The CLI buck2's java_test runs; gradle never uses it, it is here so `just lock` resolves it.
+junit-console = "org.junit.platform:junit-platform-console:6.1.3"
 jspecify = "org.jspecify:jspecify:1.0.1"
 kyori-ansi = "net.kyori:ansi:1.1.1"
 guava = "com.google.guava:guava:33.7.2-jre"

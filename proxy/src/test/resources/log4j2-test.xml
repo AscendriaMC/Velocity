@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logging for tests: the console, and nothing on disk.
+
+  log4j2 prefers log4j2-test.xml over log4j2.xml whenever both are on the classpath, which is what
+  makes this the fix rather than a flag at every call site. Without it the proxy's own config wins,
+  and its RollingRandomAccessFile writes logs/latest.log relative to the working directory -- so a
+  test run leaves a logs/ directory wherever it ran, which for buck2 is the project root.
+-->
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="[%d{HH:mm:ss} %level] [%logger]: %minecraftFormatting{%msg}{strip}%n%xEx"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>

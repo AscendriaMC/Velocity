@@ -26,6 +26,16 @@
 [parser]
   target_platform_detector_spec = target:root//...->prelude//platforms:default
 
+[test]
+  # One result per test instead of one per target: the executor asks a junit-typed command for its
+  # XML report and reports every <testcase> it finds (jvm/tools/junit-runner). Anything else --
+  # including the prelude's own targets -- is reported from its exit code, as buck2 would.
+  # Built with `just test-runner`; plain buck2, no patched binary.
+  # A bare name, not a path: buck2 hands it to the daemon as-is, and the daemon's cwd is not the
+  # project root, so a relative path never resolves. With no separators it is a PATH lookup
+  # instead, and .envrc puts the built binary there. `just test-runner` builds it.
+  v2_test_executor = junit-runner
+
 [build]
   # platforms/BUCK: local, plus remote workers when `-c re.enabled=true`.
   execution_platforms = root//platforms:execution
@@ -44,7 +54,7 @@
   # Top-level entries only -- that is all this buck2 prunes (see season-two's note on the same
   # key). Gradle's per-module build/ dirs are not declared inputs, so their churn is noise, not
   # rebuilds.
-  ignore = .jj, .git, .direnv, .gradle, .gradle-home, build, buck-out, dist, .idea, mccrypt/target
+  ignore = .jj, .git, .direnv, .gradle, .gradle-home, build, buck-out, dist, .idea, mccrypt/target, jvm/tools/junit-runner/target
 
 [buck2]
   file_watcher = notify
