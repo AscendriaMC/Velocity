@@ -35,19 +35,19 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# com.github.ben-manes.caffeine:caffeine:3.2.4
+# com.github.ben-manes.caffeine:caffeine:3.3.1
 remote_jar(
-    name = "com.github.ben-manes.caffeine__caffeine__3.2.4",
-    url = "https://repo.maven.apache.org/maven2/com/github/ben-manes/caffeine/caffeine/3.2.4/caffeine-3.2.4.jar",
-    sha256 = "9d9d2cfd681fd9272ded3d27c9930db12f89f732345975aa113ebc223bbf1224",
+    name = "com.github.ben-manes.caffeine__caffeine__3.3.1",
+    url = "https://repo.maven.apache.org/maven2/com/github/ben-manes/caffeine/caffeine/3.3.1/caffeine-3.3.1.jar",
+    sha256 = "1f916d052a3f8c0c10951f343f043f176ff2d3c2f9e380e15f0be673c5e67c48",
     visibility = ["PUBLIC"],
 )
 
-# com.github.spotbugs:spotbugs-annotations:4.10.3
+# com.github.spotbugs:spotbugs-annotations:4.10.5
 remote_jar(
-    name = "com.github.spotbugs__spotbugs-annotations__4.10.3",
-    url = "https://repo.maven.apache.org/maven2/com/github/spotbugs/spotbugs-annotations/4.10.3/spotbugs-annotations-4.10.3.jar",
-    sha256 = "3fabaf088f8cd10803cc87dba4666cf874bdcd2e07ad154ed3fe403647ce3f2a",
+    name = "com.github.spotbugs__spotbugs-annotations__4.10.5",
+    url = "https://repo.maven.apache.org/maven2/com/github/spotbugs/spotbugs-annotations/4.10.5/spotbugs-annotations-4.10.5.jar",
+    sha256 = "2f28af17ad61a7daad0f3df070198c4a5807d3ffd98a5408f670cd19fc2dce84",
     visibility = ["PUBLIC"],
 )
 
@@ -115,19 +115,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# com.google.errorprone:error_prone_annotations:2.47.0
+# com.google.errorprone:error_prone_annotations:2.50.0
 remote_jar(
-    name = "com.google.errorprone__error_prone_annotations__2.47.0",
-    url = "https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.47.0/error_prone_annotations-2.47.0.jar",
-    sha256 = "5364bc6f22e72e98195e406a58d3ba1c09ffa11dea0729592cb870dc2de4056d",
-    visibility = ["PUBLIC"],
-)
-
-# com.google.errorprone:error_prone_annotations:2.49.0
-remote_jar(
-    name = "com.google.errorprone__error_prone_annotations__2.49.0",
-    url = "https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.49.0/error_prone_annotations-2.49.0.jar",
-    sha256 = "3b1003e51b8ae56fdbd7c71073e81d1683b97e6c4dff5a9151164d59b769d13c",
+    name = "com.google.errorprone__error_prone_annotations__2.50.0",
+    url = "https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.50.0/error_prone_annotations-2.50.0.jar",
+    sha256 = "4667724877f1d37a689202da191e23efa7657c62eef93ccdac406eccfe5cdd0a",
     visibility = ["PUBLIC"],
 )
 
@@ -171,11 +163,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# com.google.guava:guava:33.6.0-jre
+# com.google.guava:guava:33.7.2-jre
 remote_jar(
-    name = "com.google.guava__guava__33.6.0-jre",
-    url = "https://repo.maven.apache.org/maven2/com/google/guava/guava/33.6.0-jre/guava-33.6.0-jre.jar",
-    sha256 = "dc573e1fca4fd5454f4a5fd3d7da2df03002876a4175bafc14a95980dd7713b3",
+    name = "com.google.guava__guava__33.7.2-jre",
+    url = "https://repo.maven.apache.org/maven2/com/google/guava/guava/33.7.2-jre/guava-33.7.2-jre.jar",
+    sha256 = "b530942257fb935f8b2cfaa5f8eb5bd59c555fd8e8d01b8ce98912e077ea606c",
     visibility = ["PUBLIC"],
 )
 
@@ -275,203 +267,203 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-buffer:4.2.16.Final
+# io.netty:netty-buffer:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-buffer__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.2.16.Final/netty-buffer-4.2.16.Final.jar",
-    sha256 = "cc36ae9fbd0b03fe755eb4eb4424ca53b59cfd297d7fd47d49e5b1059beded6c",
+    name = "io.netty__netty-buffer__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.2.20.Final/netty-buffer-4.2.20.Final.jar",
+    sha256 = "794136fc6be78e44a286c2b1420a182e135c6d06eb8c397030c1551ee50acccd",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-base:4.2.16.Final
+# io.netty:netty-codec-base:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-base__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-base/4.2.16.Final/netty-codec-base-4.2.16.Final.jar",
-    sha256 = "feb410225938d9970de6b624a0c031d079804fa5cc5e1ec6e9298f16db5998a7",
+    name = "io.netty__netty-codec-base__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-base/4.2.20.Final/netty-codec-base-4.2.20.Final.jar",
+    sha256 = "5a66da26b86d7eecedd9e0d8fe0e22ef1733bbf873e476cb9b860afbed22210c",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-compression:4.2.16.Final
+# io.netty:netty-codec-compression:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-compression__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-compression/4.2.16.Final/netty-codec-compression-4.2.16.Final.jar",
-    sha256 = "13c8565414dd2115281303ef4ad1f7cc69bd7771d8d12c7d2fb31307dff26d11",
+    name = "io.netty__netty-codec-compression__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-compression/4.2.20.Final/netty-codec-compression-4.2.20.Final.jar",
+    sha256 = "7ebae4ac80c01e2d279d0e50d377bcdaf0cf8f2f65797e0578afc810a66ab57d",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-haproxy:4.2.16.Final
+# io.netty:netty-codec-haproxy:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-haproxy__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-haproxy/4.2.16.Final/netty-codec-haproxy-4.2.16.Final.jar",
-    sha256 = "bada016d30eb0adcb0703bc5f34391482ed044675d111f830263d6f3e300675d",
+    name = "io.netty__netty-codec-haproxy__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-haproxy/4.2.20.Final/netty-codec-haproxy-4.2.20.Final.jar",
+    sha256 = "7c39ebbb12a0669756957e84f9a8c60ce4572b88eb739a52b5e87df099a0891b",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-http:4.2.16.Final
+# io.netty:netty-codec-http:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-http__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-http/4.2.16.Final/netty-codec-http-4.2.16.Final.jar",
-    sha256 = "0d16f981de8d0d304a2ab1a81f0a674892089fbaa8a583100aebb4a5b00456ec",
+    name = "io.netty__netty-codec-http__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-http/4.2.20.Final/netty-codec-http-4.2.20.Final.jar",
+    sha256 = "d08b0d473c48c61ebb2bc4d145111fa1777832aee4d2be1024891e904e36eaf5",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-marshalling:4.2.16.Final
+# io.netty:netty-codec-marshalling:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-marshalling__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-marshalling/4.2.16.Final/netty-codec-marshalling-4.2.16.Final.jar",
-    sha256 = "9691818c6e59a97e454f8381c86dfe840302168d985098a278dca07781efc75e",
+    name = "io.netty__netty-codec-marshalling__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-marshalling/4.2.20.Final/netty-codec-marshalling-4.2.20.Final.jar",
+    sha256 = "49ceb3f4f29f7f29a9acbb31b134b1c886d8fb843278d8dab530bf83cd6dfd0d",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec-protobuf:4.2.16.Final
+# io.netty:netty-codec-protobuf:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec-protobuf__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-protobuf/4.2.16.Final/netty-codec-protobuf-4.2.16.Final.jar",
-    sha256 = "bb66f23ccb543dd842ddda91b6c8e97e222220d2efa5459f6a46a22ade3b2170",
+    name = "io.netty__netty-codec-protobuf__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec-protobuf/4.2.20.Final/netty-codec-protobuf-4.2.20.Final.jar",
+    sha256 = "dc995dcfc841c8593c482604d38aab0fa414e9a7c8ea49dc36ebf188064a6470",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-codec:4.2.16.Final
+# io.netty:netty-codec:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-codec__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec/4.2.16.Final/netty-codec-4.2.16.Final.jar",
-    sha256 = "41868bcc428954e707e39a30686ceddc0bd238391d3989d04dfb72d5f0735926",
+    name = "io.netty__netty-codec__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-codec/4.2.20.Final/netty-codec-4.2.20.Final.jar",
+    sha256 = "f6616d7c26c6198c7fa3d94e20a1a0d17e8ef9fc2433de792f4009cf38b00c15",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-common:4.2.16.Final
+# io.netty:netty-common:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-common__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-common/4.2.16.Final/netty-common-4.2.16.Final.jar",
-    sha256 = "9825ee68a0dc4cd2b53e2f532502401b2211bad9b77e8b04882d9e64487283ff",
+    name = "io.netty__netty-common__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-common/4.2.20.Final/netty-common-4.2.20.Final.jar",
+    sha256 = "5807fef7eb619bc0a5d1c0e6c83199ea9bca8503203a3eb73cfdccec2d215743",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-handler:4.2.16.Final
+# io.netty:netty-handler:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-handler__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.2.16.Final/netty-handler-4.2.16.Final.jar",
-    sha256 = "a259ca496da05ac1981f95cd856211f894a328056a6129e9cd70dbbd5df401f7",
+    name = "io.netty__netty-handler__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.2.20.Final/netty-handler-4.2.20.Final.jar",
+    sha256 = "211dbbba074298046b37f841ad9ca89ed91968f6b9e97400c99ab4e6177b1f96",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-resolver:4.2.16.Final
+# io.netty:netty-resolver:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-resolver__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-resolver/4.2.16.Final/netty-resolver-4.2.16.Final.jar",
-    sha256 = "c9eca6a99036485cf1d186b4a6a595b0a54c53808319ee03924270eae04c32bb",
+    name = "io.netty__netty-resolver__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-resolver/4.2.20.Final/netty-resolver-4.2.20.Final.jar",
+    sha256 = "cb7a6027e4f366fb28dcea7e1f7088ca16bd23c2cc38e8ddfdac77a77bd144dc",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-classes-epoll:4.2.16.Final
+# io.netty:netty-transport-classes-epoll:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-classes-epoll__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-epoll/4.2.16.Final/netty-transport-classes-epoll-4.2.16.Final.jar",
-    sha256 = "9f2b53210db9c8d24e787ed43f3896aaf30d686ed270c7afbb29ab6330c6aa23",
+    name = "io.netty__netty-transport-classes-epoll__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-epoll/4.2.20.Final/netty-transport-classes-epoll-4.2.20.Final.jar",
+    sha256 = "814438f990be4eddb997f4bee67617e19bab8554d9ee2c7bd8c9c8adb970bf69",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-classes-io_uring:4.2.16.Final
+# io.netty:netty-transport-classes-io_uring:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-classes-io_uring__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-io_uring/4.2.16.Final/netty-transport-classes-io_uring-4.2.16.Final.jar",
-    sha256 = "2f0b189834aa2c945b2ef965fed301c9883b45a8c54408e2565724f46510a59e",
+    name = "io.netty__netty-transport-classes-io_uring__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-io_uring/4.2.20.Final/netty-transport-classes-io_uring-4.2.20.Final.jar",
+    sha256 = "9b47d19a7c39abeeaf3091c38c0e1d7de0a940a0e39fa7ae52defff0f33b8232",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-classes-kqueue:4.2.16.Final
+# io.netty:netty-transport-classes-kqueue:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-classes-kqueue__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-kqueue/4.2.16.Final/netty-transport-classes-kqueue-4.2.16.Final.jar",
-    sha256 = "6599b495f69420cb240ab0a1aa60a19a2df3bc72791729170e0993727637a689",
+    name = "io.netty__netty-transport-classes-kqueue__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-kqueue/4.2.20.Final/netty-transport-classes-kqueue-4.2.20.Final.jar",
+    sha256 = "62be6151dfb8a76a3902e2f0b7ce410482e91015e8ecdc89ee9e0944c30cf6eb",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-epoll:4.2.16.Final
+# io.netty:netty-transport-native-epoll:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-native-epoll__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.16.Final/netty-transport-native-epoll-4.2.16.Final.jar",
-    sha256 = "4e616ae5df3aefee2bbac34cce7290fcaede74593f8cf0a7241d0388fef20e9f",
+    name = "io.netty__netty-transport-native-epoll__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.20.Final/netty-transport-native-epoll-4.2.20.Final.jar",
+    sha256 = "8a7080ecc4a54e81a5dcbfdd375b0eaf88e423028ebbd6409af4ba376fa79618",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-epoll:4.2.16.Final:linux-aarch_64
+# io.netty:netty-transport-native-epoll:4.2.20.Final:linux-aarch_64
 remote_jar(
-    name = "io.netty__netty-transport-native-epoll__4.2.16.Final__linux-aarch_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.16.Final/netty-transport-native-epoll-4.2.16.Final-linux-aarch_64.jar",
-    sha256 = "212cc7d81390e31b580a1fb91b6c8d963b43e762ed072c555e2b09ad4476e928",
+    name = "io.netty__netty-transport-native-epoll__4.2.20.Final__linux-aarch_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.20.Final/netty-transport-native-epoll-4.2.20.Final-linux-aarch_64.jar",
+    sha256 = "19318b1d161d7f0916e2cd2184d5a7baa1ddb4f5c7a0b03e2881678f919933bd",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-epoll:4.2.16.Final:linux-x86_64
+# io.netty:netty-transport-native-epoll:4.2.20.Final:linux-x86_64
 remote_jar(
-    name = "io.netty__netty-transport-native-epoll__4.2.16.Final__linux-x86_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.16.Final/netty-transport-native-epoll-4.2.16.Final-linux-x86_64.jar",
-    sha256 = "2e00548e731948881d0c73ee79d2ead759254e750929406a1d595484758f0267",
+    name = "io.netty__netty-transport-native-epoll__4.2.20.Final__linux-x86_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.20.Final/netty-transport-native-epoll-4.2.20.Final-linux-x86_64.jar",
+    sha256 = "3f13d5fc5b96d1a02209c0082be84b4308736da8abcff18285fbbef3a333143a",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-io_uring:4.2.16.Final
+# io.netty:netty-transport-native-io_uring:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-native-io_uring__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.16.Final/netty-transport-native-io_uring-4.2.16.Final.jar",
-    sha256 = "d08cf4df90f17a803475b38861b915cb1c266c7e8bb4563ab51164f85379fed2",
+    name = "io.netty__netty-transport-native-io_uring__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.20.Final/netty-transport-native-io_uring-4.2.20.Final.jar",
+    sha256 = "6781faaadd4b0473ec27fa35fc3b1c5ef86c8aae928a49ce0a2e8d03331d2b89",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-io_uring:4.2.16.Final:linux-aarch_64
+# io.netty:netty-transport-native-io_uring:4.2.20.Final:linux-aarch_64
 remote_jar(
-    name = "io.netty__netty-transport-native-io_uring__4.2.16.Final__linux-aarch_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.16.Final/netty-transport-native-io_uring-4.2.16.Final-linux-aarch_64.jar",
-    sha256 = "4eca317be67a3799e2e12e17a8bb4144128384217da7b72ed1b75fd8687914e9",
+    name = "io.netty__netty-transport-native-io_uring__4.2.20.Final__linux-aarch_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.20.Final/netty-transport-native-io_uring-4.2.20.Final-linux-aarch_64.jar",
+    sha256 = "2655539705fbd60ed2c0442fb00c8cba25eb98f102ddd5f19bb60fe93b927654",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-io_uring:4.2.16.Final:linux-x86_64
+# io.netty:netty-transport-native-io_uring:4.2.20.Final:linux-x86_64
 remote_jar(
-    name = "io.netty__netty-transport-native-io_uring__4.2.16.Final__linux-x86_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.16.Final/netty-transport-native-io_uring-4.2.16.Final-linux-x86_64.jar",
-    sha256 = "9b6c6a6c50f4940401919b6d074e35da5a8c7239f24bd6fc530b6cac9c87ac49",
+    name = "io.netty__netty-transport-native-io_uring__4.2.20.Final__linux-x86_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-io_uring/4.2.20.Final/netty-transport-native-io_uring-4.2.20.Final-linux-x86_64.jar",
+    sha256 = "ec22404f0260d75ce7b1b4a3b9b61a1472671cc6b44399c42529cfb42e1f613f",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-kqueue:4.2.16.Final
+# io.netty:netty-transport-native-kqueue:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-native-kqueue__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.16.Final/netty-transport-native-kqueue-4.2.16.Final.jar",
-    sha256 = "58fb194ead6d5144c63d71fc5c5b00b9857ea3339a7403b71c7954d6809a513c",
+    name = "io.netty__netty-transport-native-kqueue__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.20.Final/netty-transport-native-kqueue-4.2.20.Final.jar",
+    sha256 = "c904a78bc46744d9d71b665282112cde876740570f54267d72ef40ae652eb8e7",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-kqueue:4.2.16.Final:osx-aarch_64
+# io.netty:netty-transport-native-kqueue:4.2.20.Final:osx-aarch_64
 remote_jar(
-    name = "io.netty__netty-transport-native-kqueue__4.2.16.Final__osx-aarch_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.16.Final/netty-transport-native-kqueue-4.2.16.Final-osx-aarch_64.jar",
-    sha256 = "796c503f7a80217177bd315f6448263134ee0f9042627d5fd698c760bcf99c8c",
+    name = "io.netty__netty-transport-native-kqueue__4.2.20.Final__osx-aarch_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.20.Final/netty-transport-native-kqueue-4.2.20.Final-osx-aarch_64.jar",
+    sha256 = "a5930920f9ae417aafdfa19b65c3b657326a7f7fc48b9fc27e072a574b36ec5d",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-kqueue:4.2.16.Final:osx-x86_64
+# io.netty:netty-transport-native-kqueue:4.2.20.Final:osx-x86_64
 remote_jar(
-    name = "io.netty__netty-transport-native-kqueue__4.2.16.Final__osx-x86_64",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.16.Final/netty-transport-native-kqueue-4.2.16.Final-osx-x86_64.jar",
-    sha256 = "05a09a4ab51f488f0c22f42ccce6c06935afbfac51173fae44170465aa072828",
+    name = "io.netty__netty-transport-native-kqueue__4.2.20.Final__osx-x86_64",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-kqueue/4.2.20.Final/netty-transport-native-kqueue-4.2.20.Final-osx-x86_64.jar",
+    sha256 = "053143c77b10fa7d90ec76a92b0cd4904c6708df6ce48552ef51475e474635e5",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport-native-unix-common:4.2.16.Final
+# io.netty:netty-transport-native-unix-common:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport-native-unix-common__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-unix-common/4.2.16.Final/netty-transport-native-unix-common-4.2.16.Final.jar",
-    sha256 = "41ca8fe192083d17917be7ddcecded4da4fc1db1d1656d03d0bcb14e2f431155",
+    name = "io.netty__netty-transport-native-unix-common__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-unix-common/4.2.20.Final/netty-transport-native-unix-common-4.2.20.Final.jar",
+    sha256 = "6f600d5cbd3ce39e50680de66b00d7e6a9652dac7d08a5b022101d717cb7fb52",
     visibility = ["PUBLIC"],
 )
 
-# io.netty:netty-transport:4.2.16.Final
+# io.netty:netty-transport:4.2.20.Final
 remote_jar(
-    name = "io.netty__netty-transport__4.2.16.Final",
-    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.2.16.Final/netty-transport-4.2.16.Final.jar",
-    sha256 = "cfa3f654caff906653385f4b7ddaa539d795b78f5711a622482b17d2b73484c0",
+    name = "io.netty__netty-transport__4.2.20.Final",
+    url = "https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.2.20.Final/netty-transport-4.2.20.Final.jar",
+    sha256 = "ff4f1f8158c714c1b485ef10cf2456fbd3c1b2930256b70287aeb7dc3ad94783",
     visibility = ["PUBLIC"],
 )
 
@@ -715,11 +707,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.checkerframework:checker-qual:4.2.1
+# org.checkerframework:checker-qual:4.3.1
 remote_jar(
-    name = "org.checkerframework__checker-qual__4.2.1",
-    url = "https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/4.2.1/checker-qual-4.2.1.jar",
-    sha256 = "d0831f48bf587787bd29a0574692a4e2c494acc15112a4396c71b45f553d73c6",
+    name = "org.checkerframework__checker-qual__4.3.1",
+    url = "https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/4.3.1/checker-qual-4.3.1.jar",
+    sha256 = "66c061a19e20fb005c173169534aba7bf78e904a8a6da6fe8c6e97d277f6d347",
     visibility = ["PUBLIC"],
 )
 
@@ -739,11 +731,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.jline:jline-native:4.3.1
+# org.jline:jline-native:4.4.8
 remote_jar(
-    name = "org.jline__jline-native__4.3.1",
-    url = "https://repo.maven.apache.org/maven2/org/jline/jline-native/4.3.1/jline-native-4.3.1.jar",
-    sha256 = "ff94ab4bccc3c1549444082ce07a2760cbf1ad4dae04e43508597bd802bcb231",
+    name = "org.jline__jline-native__4.4.8",
+    url = "https://repo.maven.apache.org/maven2/org/jline/jline-native/4.4.8/jline-native-4.4.8.jar",
+    sha256 = "606dcaa307c04080ad0d18fc150b078d84c2b7933e893434c7d7004c72ddfffc",
     visibility = ["PUBLIC"],
 )
 
@@ -755,11 +747,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.jline:jline-terminal-jni:4.3.1
+# org.jline:jline-terminal-ffm:4.4.8
 remote_jar(
-    name = "org.jline__jline-terminal-jni__4.3.1",
-    url = "https://repo.maven.apache.org/maven2/org/jline/jline-terminal-jni/4.3.1/jline-terminal-jni-4.3.1.jar",
-    sha256 = "1c4873798f36412827087013e424199bced29da7c8421f3850cfe7f31f274c1c",
+    name = "org.jline__jline-terminal-ffm__4.4.8",
+    url = "https://repo.maven.apache.org/maven2/org/jline/jline-terminal-ffm/4.4.8/jline-terminal-ffm-4.4.8.jar",
+    sha256 = "a31b808fa3848c24914cac9278c4483ca1d7fba28e63a3a2a36fc9b6635ccac7",
     visibility = ["PUBLIC"],
 )
 
@@ -771,19 +763,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.jline:jline-terminal:4.3.1
+# org.jline:jline-terminal:4.4.8
 remote_jar(
-    name = "org.jline__jline-terminal__4.3.1",
-    url = "https://repo.maven.apache.org/maven2/org/jline/jline-terminal/4.3.1/jline-terminal-4.3.1.jar",
-    sha256 = "272927363471fdbf2f38710befbfe866acc1ed3472062a8ced02b16686f27bcc",
-    visibility = ["PUBLIC"],
-)
-
-# org.jspecify:jspecify:1.0.0
-remote_jar(
-    name = "org.jspecify__jspecify__1.0.0",
-    url = "https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar",
-    sha256 = "1fad6e6be7557781e4d33729d49ae1cdc8fdda6fe477bb0cc68ce351eafdfbab",
+    name = "org.jline__jline-terminal__4.4.8",
+    url = "https://repo.maven.apache.org/maven2/org/jline/jline-terminal/4.4.8/jline-terminal-4.4.8.jar",
+    sha256 = "04eeba70db2eaef85a6c9e2a2413667833730189fd2359540ac4e9d8902becb1",
     visibility = ["PUBLIC"],
 )
 
@@ -795,75 +779,75 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.junit.jupiter:junit-jupiter-api:6.1.2
+# org.junit.jupiter:junit-jupiter-api:6.1.3
 remote_jar(
-    name = "org.junit.jupiter__junit-jupiter-api__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.1.2/junit-jupiter-api-6.1.2.jar",
-    sha256 = "e60794b7d94e03c4bca1c0833cfca18762da5eaac0a61b16281cbbb708103e4c",
+    name = "org.junit.jupiter__junit-jupiter-api__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/6.1.3/junit-jupiter-api-6.1.3.jar",
+    sha256 = "555d6cf20fa1710884dd01b86cc5785397ba73e21ada2d4b784f5f1a14dcafc4",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.jupiter:junit-jupiter-engine:6.1.2
+# org.junit.jupiter:junit-jupiter-engine:6.1.3
 remote_jar(
-    name = "org.junit.jupiter__junit-jupiter-engine__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.1.2/junit-jupiter-engine-6.1.2.jar",
-    sha256 = "57227ce289ed84ab205136997d2e5117f6cc695a16b7e235d59f70cdf33c3d7a",
+    name = "org.junit.jupiter__junit-jupiter-engine__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.1.3/junit-jupiter-engine-6.1.3.jar",
+    sha256 = "414559e78bbfa3bdb2eab009ac3ab1e22369ac31117c270a0bd666da115c5c6c",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.jupiter:junit-jupiter-params:6.1.2
+# org.junit.jupiter:junit-jupiter-params:6.1.3
 remote_jar(
-    name = "org.junit.jupiter__junit-jupiter-params__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.1.2/junit-jupiter-params-6.1.2.jar",
-    sha256 = "c1ed2164f6ba388518757b38f219dbe350ac098afcd126cbcbd6256fb99666ae",
+    name = "org.junit.jupiter__junit-jupiter-params__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/6.1.3/junit-jupiter-params-6.1.3.jar",
+    sha256 = "05c51cedba2c06a9770707391e006cee825876937dea580b94a265ce145d4939",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.jupiter:junit-jupiter:6.1.2
+# org.junit.jupiter:junit-jupiter:6.1.3
 remote_jar(
-    name = "org.junit.jupiter__junit-jupiter__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.1.2/junit-jupiter-6.1.2.jar",
-    sha256 = "2a7877196573a1d32fa726313deffdde2e90cca764647e605093020b08973616",
+    name = "org.junit.jupiter__junit-jupiter__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar",
+    sha256 = "6b0a14075c74221de53047e363860b7d19fce802bebc152df2c35c4089c6c379",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.platform:junit-platform-commons:6.1.2
+# org.junit.platform:junit-platform-commons:6.1.3
 remote_jar(
-    name = "org.junit.platform__junit-platform-commons__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.1.2/junit-platform-commons-6.1.2.jar",
-    sha256 = "204894c039d321743ee11e7d1dc8360170d7c64391fbea1211178a645c33a92a",
+    name = "org.junit.platform__junit-platform-commons__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/6.1.3/junit-platform-commons-6.1.3.jar",
+    sha256 = "a4774ae923c109544034aeae7c762cf017fbcdd1342403ba90e0921984b608c3",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.platform:junit-platform-console:6.1.2
+# org.junit.platform:junit-platform-console:6.1.3
 remote_jar(
-    name = "org.junit.platform__junit-platform-console__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.1.2/junit-platform-console-6.1.2.jar",
-    sha256 = "5735a840f9b679296a8fcd7b54185ca903a29503fd8952df63bba0f27307f427",
+    name = "org.junit.platform__junit-platform-console__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.1.3/junit-platform-console-6.1.3.jar",
+    sha256 = "913554ad65b9420936822889a7268a6793a942e5f77ad8b653b8ec05068fa3be",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.platform:junit-platform-engine:6.1.2
+# org.junit.platform:junit-platform-engine:6.1.3
 remote_jar(
-    name = "org.junit.platform__junit-platform-engine__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.1.2/junit-platform-engine-6.1.2.jar",
-    sha256 = "484e90828846ad6b88efe226b6fe014a75941b32b226e914d9a7758802f46f91",
+    name = "org.junit.platform__junit-platform-engine__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.1.3/junit-platform-engine-6.1.3.jar",
+    sha256 = "21ad7ad3a35beda16387979317be1833a72a71d812f9a66ee4b9a7bafb56334c",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.platform:junit-platform-launcher:6.1.2
+# org.junit.platform:junit-platform-launcher:6.1.3
 remote_jar(
-    name = "org.junit.platform__junit-platform-launcher__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.1.2/junit-platform-launcher-6.1.2.jar",
-    sha256 = "858197212c1b2acc257c9eec9b450a31923c61c1bc61e66acf0057d57bbe577a",
+    name = "org.junit.platform__junit-platform-launcher__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.1.3/junit-platform-launcher-6.1.3.jar",
+    sha256 = "1dec64b1fc0b7c47a11302aa5b4d37d8160c041b396e27067709ce775601a7b6",
     visibility = ["PUBLIC"],
 )
 
-# org.junit.platform:junit-platform-reporting:6.1.2
+# org.junit.platform:junit-platform-reporting:6.1.3
 remote_jar(
-    name = "org.junit.platform__junit-platform-reporting__6.1.2",
-    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.1.2/junit-platform-reporting-6.1.2.jar",
-    sha256 = "61706512382e1d71a2e425246e4380076c908b4698bbe09148061bdc2b34e24a",
+    name = "org.junit.platform__junit-platform-reporting__6.1.3",
+    url = "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.1.3/junit-platform-reporting-6.1.3.jar",
+    sha256 = "d584a16cd87da5609af5e35428ed4f40b192681a2487dc59d02ecb62f6c417c2",
     visibility = ["PUBLIC"],
 )
 
@@ -875,11 +859,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.mockito:mockito-core:5.23.0
+# org.mockito:mockito-core:5.24.0
 remote_jar(
-    name = "org.mockito__mockito-core__5.23.0",
-    url = "https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar",
-    sha256 = "ae295bebd5d11fab97ab297815dc7617188b86003cbce3dfd5c0d5c3a6cc4a0c",
+    name = "org.mockito__mockito-core__5.24.0",
+    url = "https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.24.0/mockito-core-5.24.0.jar",
+    sha256 = "97a1f835ad84075255aa37809e4379eff541273c02c6201cbad49bd5950932cd",
     visibility = ["PUBLIC"],
 )
 
@@ -939,19 +923,19 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.ow2.asm:asm:9.10.1
+# org.ow2.asm:asm:9.11.1
 remote_jar(
-    name = "org.ow2.asm__asm__9.10.1",
-    url = "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.10.1/asm-9.10.1.jar",
-    sha256 = "ed825d10ab1399c8c0cb669e688cf0c8c82629b4c8399b58352b68e92ca10fcb",
+    name = "org.ow2.asm__asm__9.11.1",
+    url = "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.11.1/asm-9.11.1.jar",
+    sha256 = "ae4e6e10d59d0a1500317764b21881ad883f8550e33c66e6142f7032c6fb566c",
     visibility = ["PUBLIC"],
 )
 
-# org.slf4j:slf4j-api:2.0.18
+# org.slf4j:slf4j-api:2.0.20
 remote_jar(
-    name = "org.slf4j__slf4j-api__2.0.18",
-    url = "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.18/slf4j-api-2.0.18.jar",
-    sha256 = "44508fd1576500688c790b190acdd16fec4f8c79a3e0b900afd70503cf055f55",
+    name = "org.slf4j__slf4j-api__2.0.20",
+    url = "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.20/slf4j-api-2.0.20.jar",
+    sha256 = "7e1446499b359675d8aabe6af2de86b85e72ae8a2a932c0b40d0e5ba57097439",
     visibility = ["PUBLIC"],
 )
 
@@ -1027,11 +1011,11 @@ remote_jar(
     visibility = ["PUBLIC"],
 )
 
-# org.yaml:snakeyaml:2.6
+# org.yaml:snakeyaml:2.7
 remote_jar(
-    name = "org.yaml__snakeyaml__2.6",
-    url = "https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.6/snakeyaml-2.6.jar",
-    sha256 = "c8f7a98e7394adda02f6317249710e4d1b4c7a25aa8c7eace0c2eea52eb8bf85",
+    name = "org.yaml__snakeyaml__2.7",
+    url = "https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.7/snakeyaml-2.7.jar",
+    sha256 = "2e194eba45a67dee19a4e272f4a04b18de8054e9f598b094382f6dae0b0e4b5e",
     visibility = ["PUBLIC"],
 )
 
